@@ -5,12 +5,5 @@ export function validateApiKey(key: string): boolean {
 }
 
 export function getApiKey(): string {
-  const key = process.env.APIFREAKS_API_KEY ?? "";
-  if (!validateApiKey(key)) {
-    console.error(
-      "ERROR: APIFREAKS_API_KEY must be exactly 32 alphanumeric characters.",
-    );
-    process.exit(1);
-  }
-  return key;
+  return process.env.APIFREAKS_API_KEY ?? "";
 }
