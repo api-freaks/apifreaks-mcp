@@ -1,0 +1,24 @@
+{
+  "manifest_version": "0.2",
+  "name": "@apifreaks/mcp",
+  "version": "1.0.1",
+  "description": "Official MCP server for APIFreaks — gives AI agents real-time access to 57 tools across Weather, IP Geolocation, WHOIS, DNS, SSL, Currency, Commodity, Domain, ZIP Code, Screenshot, Time, and other APIs.",
+  "author": {
+    "name": "Umar Asad <umar@apifreaks.com>"
+  },
+  "homepage": "https://apifreaks.com/",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ],
+      "env": {}
+    }
+  },
+  "tools": [],
+  "tools_generated": true,
+  "license": "Apache-2.0"
+}
