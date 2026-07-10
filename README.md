@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@apifreaks/mcp?logo=npm&label=npm&color=CB3837)](https://www.npmjs.com/package/@apifreaks/mcp)
 [![GitHub release](https://img.shields.io/github/v/release/api-freaks/apifreaks-mcp?logo=github&label=release&color=181717)](https://github.com/api-freaks/apifreaks-mcp/releases)
 [![Glama](https://glama.ai/mcp/servers/api-freaks/apifreaks-mcp/badges/score.svg)](https://glama.ai/mcp/servers/api-freaks/apifreaks-mcp)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20-5FA04E?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D24-5FA04E?logo=node.js&logoColor=white)](https://nodejs.org)
 [![CI](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-16A34A)](https://github.com/api-freaks/apifreaks-mcp/blob/main/LICENSE)
 
@@ -48,7 +48,7 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 
 ## Requirements
 
-- [Node.js](https://nodejs.org) v20 or higher
+- [Node.js](https://nodejs.org) v24 or higher
 - An APIFreaks API key — [sign up free](https://apifreaks.com)
 
 ---
