@@ -15,6 +15,9 @@ export const ENDPOINTS = {
   WEATHER_MARINE: "/v1.0/weather/marine",
   WEATHER_FLOOD: "/v1.0/weather/flood",
 
+  // IP Threat Intelligence
+  IP_SECURITY: "/v1.0/ip/security",
+
   // Geolocation
   GEO_IP_LOOKUP: "/v2.0/geolocation/lookup",
   GEO_ASTRONOMY: "/v2.0/geolocation/astronomy",

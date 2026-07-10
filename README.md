@@ -320,14 +320,16 @@ Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurre
 
 ---
 
-### IP Intelligence — 2 tools
+### IP Intelligence — 4 tools
 
-Geolocation, ISP, and network data for any IP address.
+Geolocation, ISP, network, and threat data for any IP address.
 
 | Tool | Description |
 |---|---|
 | `ipgeolocation_lookup` | Geolocation data for an IP, IPv6 address, or hostname |
 | `ipgeolocation_bulk_lookup` | Geolocation data for up to 50,000 IPs in one request |
+| `ip_security_lookup` | Threat score, VPN/proxy/Tor/bot detection for a single IP |
+| `ip_security_bulk_lookup` | Threat intelligence for up to 50,000 IPs in one request |
 
 ---
 

@@ -98,4 +98,66 @@ export function register(server: McpServer, apiKey: string): void {
       };
     },
   );
+
+  server.registerTool(
+    "ip_security_lookup",
+    {
+      title: "IP Threat Intelligence Lookup",
+      description:
+        "IP threat intelligence for a single IP address. Returns a threat score plus VPN, proxy, " +
+        "Tor, residential proxy, relay, bot, spam, known-attacker, and cloud-provider detection.",
+      inputSchema: z.object({
+        ip: z.string().describe("IPv4 or IPv6 address to check."),
+        fields: z.string().optional().describe(FIELDS_DESC),
+        excludes: z.string().optional().describe(EXCLUDES_DESC),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ ip, fields, excludes }) => {
+      const params: Params = { ip };
+      if (fields !== undefined) params["fields"] = fields;
+      if (excludes !== undefined) params["excludes"] = excludes;
+      const data = await callApi(ENDPOINTS.IP_SECURITY, apiKey, params);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "ip_security_bulk_lookup",
+    {
+      title: "Bulk IP Threat Intelligence Lookup",
+      description:
+        "IP threat intelligence for up to 50,000 IP addresses in one request. Returns an array of " +
+        "threat scores plus VPN, proxy, Tor, residential proxy, relay, bot, spam, known-attacker, " +
+        "and cloud-provider detection for each IP.",
+      inputSchema: z.object({
+        ips: z  
+          .array(z.string())
+          .max(50_000)
+          .describe(
+            'List of IPv4/IPv6 addresses to check (max 50,000). Example: ["8.8.8.8", "1.1.1.1"]',
+          ),
+        fields: z.string().optional().describe(FIELDS_DESC),
+        excludes: z.string().optional().describe(EXCLUDES_DESC),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ ips, fields, excludes }) => {
+      const params: Params = {};
+      if (fields !== undefined) params["fields"] = fields;
+      if (excludes !== undefined) params["excludes"] = excludes;
+      const data = await callApi(
+        ENDPOINTS.IP_SECURITY,
+        apiKey,
+        params,
+        { ips },
+        "POST",
+      );
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
 }

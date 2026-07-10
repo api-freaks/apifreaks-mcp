@@ -29,6 +29,3 @@ yarn-debug.log*
 
 # Test coverage
 coverage/
-
-# Internal notes (not for public repo)
-tmp/
