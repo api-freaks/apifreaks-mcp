@@ -2,11 +2,12 @@
   "manifest_version": "0.2",
   "name": "@apifreaks/mcp",
   "version": "1.0.1",
-  "description": "Official MCP server for APIFreaks — gives AI agents real-time access to 57 tools across Weather, IP Geolocation, WHOIS, DNS, SSL, Currency, Commodity, Domain, ZIP Code, Screenshot, Time, and other APIs.",
+  "description": "The official MCP server for APIFreaks — real-time Weather, WHOIS, DNS, SSL, IP intelligence, currency, domain checks, screenshots, and more.",
   "author": {
     "name": "Umar Asad <umar@apifreaks.com>"
   },
-  "homepage": "https://apifreaks.com/",
+  "homepage": "https://apifreaks.com/integrations/mcp-server",
+  "license": "Apache-2.0",
   "server": {
     "type": "node",
     "entry_point": "dist/index.js",
@@ -15,10 +16,251 @@
       "args": [
         "${__dirname}/dist/index.js"
       ],
-      "env": {}
+      "env": {
+        "APIFREAKS_API_KEY": "${config.apiKey}"
+      }
     }
   },
-  "tools": [],
-  "tools_generated": true,
-  "license": "Apache-2.0"
+  "configSchema": {
+    "type": "object",
+    "required": ["apiKey"],
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "title": "APIFreaks API Key",
+        "description": "Your APIFreaks API key. Get one free at apifreaks.com."
+      }
+    }
+  },
+  "tools_generated": false,
+  "tools": [
+    {
+      "name": "weather_current",
+      "description": "Get real-time weather for a location, including temperature, humidity, wind, pressure, air quality (AQI), and astronomy data."
+    },
+    {
+      "name": "weather_bulk_current",
+      "description": "Get real-time weather for up to 50 locations at once."
+    },
+    {
+      "name": "weather_forecast",
+      "description": "Get weather forecast for up to 16 days with daily, hourly, or minutely precision."
+    },
+    {
+      "name": "weather_historical",
+      "description": "Get historical weather data for a specific past date (back to 1940)."
+    },
+    {
+      "name": "weather_time_series",
+      "description": "Get historical weather data over a date range. Max 90 days daily, 7 days hourly."
+    },
+    {
+      "name": "weather_air_quality",
+      "description": "Get real-time or forecast air quality — PM2.5, PM10, CO, NO₂, SO₂, ozone, dust, and UV index."
+    },
+    {
+      "name": "weather_marine",
+      "description": "Get marine/ocean weather, real-time or forecast up to 16 days — waves, swell, wind, sea-surface data."
+    },
+    {
+      "name": "weather_flood_forecast",
+      "description": "Get flood forecast data — river discharge and flow percentiles up to 16 days ahead."
+    },
+    {
+      "name": "currency_latest_rates",
+      "description": "Retrieve the latest exchange rates for 170+ fiat currencies and 830+ cryptocurrencies."
+    },
+    {
+      "name": "currency_historical_rates",
+      "description": "Retrieve historical exchange rates for a specific past date."
+    },
+    {
+      "name": "currency_latest_converter",
+      "description": "Convert an amount from one currency to another using the latest exchange rates."
+    },
+    {
+      "name": "currency_historical_converter",
+      "description": "Convert an amount between currencies using exchange rates from a specific past date."
+    },
+    {
+      "name": "currency_time_series",
+      "description": "Retrieve historical exchange rates day-by-day across a custom date range (max 1 year)."
+    },
+    {
+      "name": "currency_fluctuation",
+      "description": "Retrieve exchange rate fluctuation metrics — start rate, end rate, absolute and percent change."
+    },
+    {
+      "name": "currency_geo_convert",
+      "description": "Convert an amount to the local currency of an IP address's location."
+    },
+    {
+      "name": "currency_supported",
+      "description": "Get the full list of supported currencies with code, name, country data, and status."
+    },
+    {
+      "name": "currency_symbols",
+      "description": "Get a map of supported currency symbols to currency names."
+    },
+    {
+      "name": "currency_symbol_info",
+      "description": "Validate a currency symbol and return its full name."
+    },
+    {
+      "name": "ipgeolocation_lookup",
+      "description": "Look up geolocation, network/ASN, currency, and security data for an IP address or hostname."
+    },
+    {
+      "name": "ipgeolocation_bulk_lookup",
+      "description": "Look up geolocation data for up to 50,000 IP addresses or hostnames in one request."
+    },
+    {
+      "name": "whois_domain_lookup",
+      "description": "Retrieve live WHOIS data for a domain — registrar, contacts, name servers, and expiry dates."
+    },
+    {
+      "name": "whois_ip_lookup",
+      "description": "Retrieve live WHOIS ownership and network data for an IPv4 or IPv6 address."
+    },
+    {
+      "name": "whois_asn_lookup",
+      "description": "Retrieve real-time WHOIS data for an ASN — name, org, routes, and peers."
+    },
+    {
+      "name": "whois_domain_history",
+      "description": "Retrieve historical WHOIS snapshots for a domain, with data going back to 1986."
+    },
+    {
+      "name": "whois_reverse_lookup",
+      "description": "Search WHOIS records in reverse to find all domains linked to an owner, email, company, or keyword."
+    },
+    {
+      "name": "whois_bulk_domain_lookup",
+      "description": "Retrieve live WHOIS data for up to 100 domain names in one request."
+    },
+    {
+      "name": "dns_lookup",
+      "description": "Retrieve real-time DNS records for a hostname — A, AAAA, MX, NS, SOA, SPF, TXT, CNAME."
+    },
+    {
+      "name": "dns_history",
+      "description": "Retrieve historical DNS record snapshots for a hostname."
+    },
+    {
+      "name": "dns_reverse",
+      "description": "Find all hostnames associated with a specific DNS record value — reverse IP, MX, NS, and more."
+    },
+    {
+      "name": "dns_bulk_lookup",
+      "description": "Retrieve real-time DNS records for up to 100 hostnames at once."
+    },
+    {
+      "name": "domain_check_availability",
+      "description": "Check whether a domain name is available for registration."
+    },
+    {
+      "name": "domain_check_availability_with_suggestions",
+      "description": "Check domain availability and get alternative suggestions across different TLDs."
+    },
+    {
+      "name": "domain_bulk_check_availability",
+      "description": "Check domain availability for up to 100 domains at once."
+    },
+    {
+      "name": "ssl_live_lookup",
+      "description": "Retrieve the live SSL certificate for a domain — validity, issuer, SANs, and PEM output."
+    },
+    {
+      "name": "ssl_live_chain_lookup",
+      "description": "Retrieve the complete SSL certificate chain including intermediates and root CA."
+    },
+    {
+      "name": "commodity_symbols",
+      "description": "List all supported commodity symbols with name, unit, quote currency, and exchange."
+    },
+    {
+      "name": "commodity_symbol_info",
+      "description": "Validate a commodity symbol and return its full metadata."
+    },
+    {
+      "name": "commodity_quotes",
+      "description": "List all supported commodity quote currencies."
+    },
+    {
+      "name": "commodity_latest_rates",
+      "description": "Get real-time prices for one or more commodities."
+    },
+    {
+      "name": "commodity_historical_rates",
+      "description": "Get historical OHLC prices for commodities on a specific date."
+    },
+    {
+      "name": "commodity_fluctuation",
+      "description": "Get price fluctuation metrics for commodities over a date range."
+    },
+    {
+      "name": "commodity_time_series",
+      "description": "Get daily OHLC prices for commodities over a date range (max 365 days)."
+    },
+    {
+      "name": "zipcode_lookup",
+      "description": "Look up a ZIP or postal code — city, region, country, and coordinates."
+    },
+    {
+      "name": "zipcode_bulk_lookup",
+      "description": "Look up details for up to 100 ZIP or postal codes at once."
+    },
+    {
+      "name": "zipcode_radius_search",
+      "description": "Find all ZIP codes within a given radius of a center point."
+    },
+    {
+      "name": "zipcode_distance",
+      "description": "Calculate the distance from a base point to each of up to 100 ZIP codes."
+    },
+    {
+      "name": "zipcode_distance_match",
+      "description": "Find all pairs of ZIP codes within a given distance threshold."
+    },
+    {
+      "name": "zipcode_by_city",
+      "description": "Get all ZIP or postal codes for a city."
+    },
+    {
+      "name": "zipcode_by_region",
+      "description": "Get all ZIP or postal codes for a state, province, or region."
+    },
+    {
+      "name": "timezone_lookup",
+      "description": "Look up timezone info for a location — accepts IP, city, lat/long, IATA, ICAO, or UN/LOCODE."
+    },
+    {
+      "name": "timezone_convert",
+      "description": "Convert a date and time from one timezone to another."
+    },
+    {
+      "name": "screenshot_capture",
+      "description": "Capture a static screenshot of a webpage and return the image URL."
+    },
+    {
+      "name": "screenshot_capture_scrolling",
+      "description": "Record a scrolling video or animated GIF of a webpage."
+    },
+    {
+      "name": "screenshot_bulk_capture",
+      "description": "Capture screenshots of up to 50 webpages in a single request."
+    },
+    {
+      "name": "user_agent_parse",
+      "description": "Parse a user-agent string to extract browser, device, OS, and engine details."
+    },
+    {
+      "name": "user_agent_bulk_parse",
+      "description": "Parse up to 100 user-agent strings in a single request."
+    },
+    {
+      "name": "astronomy_lookup",
+      "description": "Get astronomy data for a location and date — sunrise, sunset, moon phase, twilight, golden hour, and more."
+    }
+  ]
 }
