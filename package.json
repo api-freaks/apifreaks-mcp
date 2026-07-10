@@ -1,6 +1,6 @@
 {
   "name": "@apifreaks/mcp",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "The official MCP server for APIFreaks — gives AI agents real-time access to Weather, IP Geolocation, WHOIS, DNS, SSL, Currency, Commodity, Domain, ZIP Code, Screenshot, Timezone, User Agent, and Astronomy APIs.",
   "license": "Apache-2.0",
   "author": "Umar Asad <umar@apifreaks.com>",
