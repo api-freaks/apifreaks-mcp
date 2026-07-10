@@ -7,7 +7,8 @@ import { READ_ONLY, type Params } from "../constants.js";
 
 const INCLUDE_DESC =
   "Additional data modules to include. " +
-  "Available: security, hostname, liveHostname, hostnameFallbackLive, user_agent, abuse, dma_code, time_zone, geo_accuracy.";
+  "Available: security, hostname, liveHostname, hostnameFallbackLive, user_agent, abuse, dma_code, geo_accuracy. Use '*' to include all modules. " +
+  "Note: 'security' and 'abuse' fields cost extra credits.";
 const FIELDS_DESC =
   "Comma-separated dot-path fields to include in the response (allowlist). E.g. 'location.city,asn.organization'.";
 const EXCLUDES_DESC =
@@ -22,8 +23,8 @@ const IncludeModule = z.enum([
   "user_agent",
   "abuse",
   "dma_code",
-  "time_zone",
   "geo_accuracy",
+  "*"
 ]);
 
 export function register(server: McpServer, apiKey: string): void {
@@ -33,7 +34,7 @@ export function register(server: McpServer, apiKey: string): void {
       title: "IP Geolocation Lookup",
       description:
         "Look up geolocation data for an IP address, IPv6 address, or hostname. " +
-        "Returns location, network/ASN, currency, and optionally security, timezone, " +
+        "Returns location, network/ASN, currency, timezone and optionally security, dma_code, " +
         "hostname, abuse contact, and user-agent data. 'ip' field is required — pass the IP or hostname to look up.",
       inputSchema: z.object({
         ip: z
