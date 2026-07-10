@@ -16,16 +16,16 @@ export const ENDPOINTS = {
   WEATHER_FLOOD: "/v1.0/weather/flood",
 
   // Geolocation
-  GEO_IP_LOOKUP: "/v1.0/geolocation/lookup",
-  GEO_ASTRONOMY: "/v1.0/geolocation/astronomy",
-  GEO_TIMEZONE: "/v1.0/geolocation/timezone",
+  GEO_IP_LOOKUP: "/v2.0/geolocation/lookup",
+  GEO_ASTRONOMY: "/v2.0/geolocation/astronomy",
+  GEO_TIMEZONE: "/v2.0/geolocation/timezone",
   GEO_TIMEZONE_CONVERTER: "/v1.0/timezone/converter",
 
   // User Agent
   USER_AGENT_LOOKUP: "/v1.0/user-agent/lookup",
 
   // WHOIS
-  WHOIS_DOMAIN_LIVE: "/v1.0/domain/whois/live",
+  WHOIS_DOMAIN_LIVE: "/v2.0/domain/whois/live",
   WHOIS_IP_LIVE: "/v1.0/ip/whois/live",
   WHOIS_ASN_LIVE: "/v1.0/asn/whois/live",
   WHOIS_DOMAIN_HISTORY: "/v1.0/domain/whois/history",
