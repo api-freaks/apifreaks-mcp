@@ -7,7 +7,7 @@
 [![CI](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-16A34A)](https://github.com/api-freaks/apifreaks-mcp/blob/main/LICENSE)
 
-The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, and more.
+The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, web scrapes, VAT/IBAN/SWIFT, email and phone validation, geocoding, and more.
 
 **What can you ask once it's connected?**
 
@@ -65,12 +65,12 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 
 ## Modules
 
-This server covers many APIs (50+ tools today, growing). Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
+This server covers many APIs. Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
 
-Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`, which tells the client to add `APIFREAKS_MODULES` and restart.
+Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then add the ones you need to `APIFREAKS_MODULES` and restart.
 
 ```bash
-APIFREAKS_MODULES=weather,whois,dns
+APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather
 ```
 
 Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both work). Unknown names are ignored and logged to stderr.
@@ -78,18 +78,24 @@ Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both 
 | Module | Tools |
 |---|---|
 | `weather` | Current, forecast, historical, air quality, marine, flood |
-| `currency` | Live/historical rates, converters, time series, symbols |
+| `currency` | Live/historical rates, converters, time series, symbols, historical data limits |
 | `ip-intelligence` | IP geolocation and threat intelligence (single + bulk) |
 | `whois` | Domain, IP, ASN, history, reverse, bulk |
 | `dns` | Live lookup, history, reverse, bulk |
-| `domain` | Availability checks, suggestions, bulk |
+| `domain` | Availability checks, suggestions, bulk, subdomain lookup |
 | `ssl` | Live certificate and full chain |
 | `commodity` | Symbols, quotes, latest/historical rates, fluctuation, time series |
 | `zipcode` | Lookup, radius, distance, city/region |
 | `timezone` | Lookup and convert |
 | `screenshot` | Capture, scrolling capture, bulk |
+| `scraper` | Static HTML scrape and JS-rendered scrape |
 | `user-agent` | Parse single or bulk user-agent strings |
 | `astronomy` | Sunrise, sunset, moon phase, and related solar/lunar data |
+| `financial` | SWIFT lookup/finder, IBAN, VAT rates and validation, supported countries |
+| `email-validation` | Single and bulk email validation |
+| `phone-validation` | Single and bulk phone validation |
+| `geocoding` | Forward and reverse geocoding |
+| `geodb` | Countries, cities, regions, admin units, flags |
 
 ---
 
@@ -106,10 +112,10 @@ Full API documentation: [apifreaks.com/docs](https://apifreaks.com/docs)
 The fastest way to connect it — via the Claude Code CLI:
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=weather,whois -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
-Replace `weather,whois` with the [modules](#modules) you need. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
+Replace `ip-intelligence,currency,whois,dns,weather` with the [modules](#modules) you need. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
 
 ---
 
@@ -120,7 +126,7 @@ Replace `weather,whois` with the [modules](#modules) you need. For Cursor, Winds
 **Via terminal (recommended):**
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=weather,whois -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 **Via config file** (`~/.claude/settings.json`):
@@ -133,7 +139,7 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODU
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -145,7 +151,7 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODU
 ### Codex CLI
 
 ```bash
-codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here --env APIFREAKS_MODULES=weather,whois -- npx -y @apifreaks/mcp
+codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here --env APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 Start a new Codex session after adding the server.
@@ -167,7 +173,7 @@ Edit `claude_desktop_config.json`:
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -190,7 +196,7 @@ Create or edit `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` 
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -213,7 +219,7 @@ Edit `~/.codeium/windsurf/mcp_config.json`:
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -238,7 +244,7 @@ Open the **MCP Servers** panel in Cline, click **Configure**, then **Advanced MC
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -262,7 +268,7 @@ Edit `~/.config/opencode/config.json`:
       "command": ["npx", "-y", "@apifreaks/mcp"],
       "environment": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -283,7 +289,7 @@ Edit `~/.gemini/settings.json` (or `.gemini/settings.json` in your project root 
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -305,7 +311,7 @@ Create `.vscode/mcp.json` in your workspace:
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "weather,whois"
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -341,7 +347,7 @@ Real-time conditions, forecasts, historical data, and environmental monitoring.
 
 ---
 
-### Currency (`currency`) — 10 tools
+### Currency (`currency`) — 12 tools
 
 Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurrencies.
 
@@ -357,6 +363,8 @@ Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurre
 | `currency_supported` | Full list of supported currencies with metadata |
 | `currency_symbols` | Map of currency symbols to currency names |
 | `currency_symbol_info` | Validate a currency symbol and get its full name |
+| `currency_historical_data_limits` | Historical data availability window for every currency |
+| `currency_historical_data_limit_info` | Historical data availability window for one currency code |
 
 ---
 
@@ -401,15 +409,16 @@ Live DNS records, history, and reverse lookups.
 
 ---
 
-### Domain (`domain`) — 3 tools
+### Domain (`domain`) — 4 tools
 
-Domain availability checks with bulk support and suggestions.
+Domain availability checks with bulk support, suggestions, and subdomain discovery.
 
 | Tool | Description |
 |---|---|
 | `domain_check_availability` | Check whether a domain name is available for registration |
 | `domain_check_availability_with_suggestions` | Check availability and get alternative domain suggestions |
 | `domain_bulk_check_availability` | Check availability for up to 100 domains at once |
+| `domain_subdomain_lookup` | Paginated list of discovered subdomains for a domain |
 
 ---
 
@@ -479,6 +488,17 @@ Capture screenshots and scrolling recordings of any webpage.
 
 ---
 
+### Scraper (`scraper`) — 2 tools
+
+Extract HTML or structured fields from a URL. Static mode first; JS rendering only when the page needs a browser.
+
+| Tool | Description |
+|---|---|
+| `scraper_scrape` | Scrape static HTML (optional extract / form submit). Empty instructions return the full page |
+| `scraper_scrape_js` | Scrape with JavaScript rendering, browser steps, proxies, and optional CAPTCHA solving |
+
+---
+
 ### User Agent (`user-agent`) — 2 tools
 
 Parse user-agent strings to extract browser, OS, and device information.
@@ -497,6 +517,76 @@ Solar and lunar data for any location and date.
 | Tool | Description |
 |---|---|
 | `astronomy_lookup` | Sunrise, sunset, moon phase, twilight, golden hour, solar noon, moonrise, and sun/moon positions |
+
+---
+
+### Financial (`financial`) — 9 tools
+
+SWIFT/BIC lookup, IBAN validation, VAT rates and VAT-number checks.
+
+| Tool | Description |
+|---|---|
+| `financial_supported_countries` | Countries (and VAT states) supported by VAT, IBAN, and SWIFT APIs |
+| `financial_supported_country_info` | Check whether one country is supported by VAT, IBAN, and/or SWIFT |
+| `financial_swift_lookup` | Bank details for an 8- or 11-character SWIFT/BIC code |
+| `financial_swift_finder` | Drill down country → bank → city → SWIFT/BIC codes |
+| `financial_iban_validate` | Validate an IBAN (format, checksum, bank/SEPA metadata) |
+| `financial_vat_validate` | Validate an EU (VIES) or UK (HMRC) VAT number |
+| `financial_vat_rates_by_country` | VAT rates for a country, optionally by state |
+| `financial_vat_rates_bulk` | VAT rates for up to 100 countries/states |
+| `financial_vat_rates_by_ip` | VAT rates for the country resolved from an IP address |
+
+---
+
+### Email Validation (`email-validation`) — 2 tools
+
+Deliverability, syntax, domain, and optional IP enrichment.
+
+| Tool | Description |
+|---|---|
+| `email_validate` | Validate a single email address |
+| `email_bulk_validate` | Validate up to 100 email addresses in one request |
+
+---
+
+### Phone Validation (`phone-validation`) — 2 tools
+
+Carrier, line type, location, and standardized formats.
+
+| Tool | Description |
+|---|---|
+| `phone_validate` | Validate a single phone number |
+| `phone_bulk_validate` | Validate up to 100 phone numbers in one request |
+
+---
+
+### Geocoding (`geocoding`) — 2 tools
+
+Address ↔ coordinate conversion.
+
+| Tool | Description |
+|---|---|
+| `geocode_forward` | Convert an address or place name into coordinates |
+| `geocode_reverse` | Convert coordinates into a street address |
+
+---
+
+### GeoDB (`geodb`) — 10 tools
+
+Countries, cities, administrative units, and flag images.
+
+| Tool | Description |
+|---|---|
+| `geodb_regions` | List GeoDB regions (Africa, Americas, Asia, Europe, Oceania, Polar) |
+| `geodb_subregions` | List subregions, optionally filtered by region |
+| `geodb_countries` | List countries with ISO codes, capitals, and regions |
+| `geodb_country_details` | Full metadata for one country by alpha-2 code |
+| `geodb_admin_levels` | Administrative level types for a country |
+| `geodb_admin_units` | States, provinces, and other admin units for a country |
+| `geodb_admin_unit_details` | Details for one administrative unit |
+| `geodb_cities` | Cities for a country, optionally filtered by admin unit |
+| `geodb_flags_supported` | Supported country and organization flag identifiers |
+| `geodb_flag` | Retrieve a country or organization flag image |
 
 ---
 

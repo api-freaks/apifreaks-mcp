@@ -309,18 +309,13 @@ export function register(server: McpServer, apiKey: string): void {
     },
     async ({ symbol }) => {
       const data = await callApi(ENDPOINTS.CURRENCY_SYMBOLS, apiKey);
-      const raw = data["currencySymbols"];
-      const map = (typeof raw === "object" && raw !== null && !Array.isArray(raw))
-        ? (raw as Record<string, string>)
-        : undefined;
-      const upper = symbol.toUpperCase();
-      const key = map ? Object.keys(map).find((k) => k.toUpperCase() === upper) : undefined;
-      if (key === undefined || map === undefined) {
+      const match = lookupStringMap(data["currencySymbols"], symbol);
+      if (match === undefined) {
         return {
           content: [
             {
               type: "text" as const,
-              text: `Symbol '${symbol}' not found. Use 'currency_symbols' to browse all available symbols.`,
+              text: missingSymbolText(symbol, "currency_symbols"),
             },
           ],
         };
@@ -329,10 +324,100 @@ export function register(server: McpServer, apiKey: string): void {
         content: [
           {
             type: "text" as const,
-            text: JSON.stringify({ symbol: key, name: map[key] }),
+            text: JSON.stringify({ symbol: match.key, name: match.value }),
           },
         ],
       };
     },
   );
+
+  server.registerTool(
+    "currency_historical_data_limits",
+    {
+      title: "Currency Historical Data Limits",
+      description:
+        "Get a map of currency codes to the date range when historical exchange-rate data is available (YYYY-MM-DD to YYYY-MM-DD). " +
+        "Covers fiat, crypto, and precious metals.",
+      inputSchema: z.object({}),
+      annotations: READ_ONLY,
+    },
+    async () => {
+      const data = await callApi(
+        ENDPOINTS.CURRENCY_HISTORICAL_DATA_LIMITS,
+        apiKey,
+      );
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "currency_historical_data_limit_info",
+    {
+      title: "Currency Historical Data Limit Info",
+      description:
+        "Look up the historical data availability window for one currency symbol. " +
+        "Use this instead of 'currency_historical_data_limits' when you already have a symbol and just need its date range.",
+      inputSchema: z.object({
+        symbol: z
+          .string()
+          .describe(
+            "The currency symbol to look up (e.g. 'USD', 'EUR', 'BTC').",
+          ),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ symbol }) => {
+      const data = await callApi(
+        ENDPOINTS.CURRENCY_HISTORICAL_DATA_LIMITS,
+        apiKey,
+      );
+      const match = lookupStringMap(data["availabilityPeriod"], symbol);
+      if (match === undefined) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: missingSymbolText(
+                symbol,
+                "currency_historical_data_limits",
+              ),
+            },
+          ],
+        };
+      }
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({
+              symbol: match.key,
+              availabilityPeriod: match.value,
+            }),
+          },
+        ],
+      };
+    },
+  );
+}
+
+function lookupStringMap(
+  map: unknown,
+  symbol: string,
+): { key: string; value: string } | undefined {
+  if (typeof map !== "object" || map === null || Array.isArray(map)) {
+    return undefined;
+  }
+  const record = map as Record<string, string>;
+  const upper = symbol.toUpperCase();
+  const key = Object.keys(record).find((k) => k.toUpperCase() === upper);
+  if (key === undefined) {
+    return undefined;
+  }
+  return { key, value: record[key] };
+}
+
+function missingSymbolText(symbol: string, listTool: string): string {
+  return `Symbol '${symbol}' not found. Use '${listTool}' to browse all available symbols.`;
 }

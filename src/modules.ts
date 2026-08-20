@@ -2,12 +2,24 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { READ_ONLY } from "./constants.js";
 import { ENV, getModulesEnv } from "./env.js";
+import {
+  MODULE_CATALOG,
+  MODULE_NAMES,
+  type ModuleName,
+  type ModuleTool,
+} from "./module-catalog.js";
 import { register as registerAstronomy } from "./tools/astronomy.js";
 import { register as registerCommodity } from "./tools/commodity.js";
 import { register as registerCurrency } from "./tools/currency.js";
 import { register as registerDns } from "./tools/dns.js";
 import { register as registerDomain } from "./tools/domain.js";
+import { register as registerEmailValidation } from "./tools/email-validation.js";
+import { register as registerFinancial } from "./tools/financial.js";
+import { register as registerGeocoding } from "./tools/geocoding.js";
+import { register as registerGeodb } from "./tools/geodb.js";
 import { register as registerIpIntelligence } from "./tools/ip-intelligence.js";
+import { register as registerPhoneValidation } from "./tools/phone-validation.js";
+import { register as registerScraper } from "./tools/scraper.js";
 import { register as registerScreenshot } from "./tools/screenshot.js";
 import { register as registerSsl } from "./tools/ssl.js";
 import { register as registerTimezone } from "./tools/timezone.js";
@@ -16,7 +28,10 @@ import { register as registerWeather } from "./tools/weather.js";
 import { register as registerWhois } from "./tools/whois.js";
 import { register as registerZipcode } from "./tools/zipcode.js";
 
-const MODULES = {
+const MODULES: Record<
+  ModuleName,
+  (server: McpServer, apiKey: string) => void
+> = {
   weather: registerWeather,
   currency: registerCurrency,
   "ip-intelligence": registerIpIntelligence,
@@ -28,13 +43,15 @@ const MODULES = {
   zipcode: registerZipcode,
   timezone: registerTimezone,
   screenshot: registerScreenshot,
+  scraper: registerScraper,
   "user-agent": registerUserAgent,
   astronomy: registerAstronomy,
-} as const;
-
-type ModuleName = keyof typeof MODULES;
-
-const MODULE_NAMES = Object.keys(MODULES) as Array<ModuleName>;
+  financial: registerFinancial,
+  "email-validation": registerEmailValidation,
+  "phone-validation": registerPhoneValidation,
+  geocoding: registerGeocoding,
+  geodb: registerGeodb,
+};
 
 export function registerEnabledModules(
   server: McpServer,
@@ -85,15 +102,14 @@ function registerListModules(
   enabled: Array<ModuleName>,
   unknown: Array<string>,
 ): void {
-  const message =
+  const description =
     enabled.length === 0
-      ? `No APIFreaks API tools are available because ${ENV.MODULES} is not set. ` +
-        `Ask the user to add ${ENV.MODULES} to this MCP server's env in their client config, then restart the server. ` +
-        `Use a comma-separated list of modules. Available: ${MODULE_NAMES.join(", ")}. ` +
-        `Example: ${ENV.MODULES}=weather,whois`
+      ? `No APIFreaks API tools are registered because ${ENV.MODULES} is not set. ` +
+        `Call this tool to see each module and the tools it contains, then ask the user to add the needed modules to ${ENV.MODULES} and restart. ` +
+        `Example: ${ENV.MODULES}=geodb,weather`
       : `Enabled APIFreaks modules: ${enabled.join(", ")}. ` +
-        `Available modules: ${MODULE_NAMES.join(", ")}. ` +
-        `To change the set, update ${ENV.MODULES} in the MCP client config and restart.`;
+        `Call this tool to see tools in every module if something the user needs is not enabled. ` +
+        `To change the set, update ${ENV.MODULES} and restart.`;
 
   server.registerTool(
     "list_modules",
@@ -102,7 +118,7 @@ function registerListModules(
         enabled.length === 0
           ? `Set ${ENV.MODULES} to enable tools`
           : "List APIFreaks modules",
-      description: message,
+      description,
       inputSchema: z.object({}),
       annotations: READ_ONLY,
     },
@@ -116,12 +132,31 @@ function registerListModules(
               enabled,
               unknown,
               available: MODULE_NAMES,
-              message,
-              example: `${ENV.MODULES}=weather,whois`,
+              modules: moduleCatalogPayload(enabled),
+              example: `${ENV.MODULES}=weather,whois,geodb`,
             }),
           },
         ],
       };
     },
   );
+}
+
+function moduleCatalogPayload(enabled: Array<ModuleName>): Record<
+  ModuleName,
+  { enabled: boolean; summary: string; tools: Array<ModuleTool> }
+> {
+  const enabledSet = new Set<ModuleName>(enabled);
+  const catalog = {} as Record<
+    ModuleName,
+    { enabled: boolean; summary: string; tools: Array<ModuleTool> }
+  >;
+  for (const name of MODULE_NAMES) {
+    catalog[name] = {
+      enabled: enabledSet.has(name),
+      summary: MODULE_CATALOG[name].summary,
+      tools: MODULE_CATALOG[name].tools,
+    };
+  }
+  return catalog;
 }
