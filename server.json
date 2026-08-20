@@ -22,6 +22,12 @@
           "description": "Your APIFreaks API key — get one free at apifreaks.com",
           "isRequired": true,
           "isSecret": true
+        },
+        {
+          "name": "APIFREAKS_MODULES",
+          "description": "Comma-separated modules to expose as tools (e.g. weather,whois,dns). If unset, only list_modules is advertised. Available: weather, currency, ip-intelligence, whois, dns, domain, ssl, commodity, zipcode, timezone, screenshot, user-agent, astronomy",
+          "isRequired": true,
+          "isSecret": false
         }
       ]
     }

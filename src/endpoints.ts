@@ -70,5 +70,3 @@ export const ENDPOINTS = {
   SCREENSHOT: "/v1.0/screenshot",
 
 } as const;
-
-export type Endpoint = (typeof ENDPOINTS)[keyof typeof ENDPOINTS];

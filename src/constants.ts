@@ -1,4 +1,4 @@
-export type ParamValue = string | number | boolean | string[];
+type ParamValue = string | number | boolean | string[];
 export type Params = Record<string, ParamValue>;
 export type Body = Record<string, unknown>;
 

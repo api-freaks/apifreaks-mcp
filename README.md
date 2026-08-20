@@ -26,6 +26,7 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 
 - [Requirements](#requirements)
 - [Environment Variables](#environment-variables)
+- [Modules](#modules)
 - [Getting Your API Key](#getting-your-api-key)
 - [Quick Start](#quick-start)
 - [Integration Guides](#integration-guides)
@@ -58,6 +59,37 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 | Variable | Required | Description |
 |---|---|---|
 | `APIFREAKS_API_KEY` | Yes | Your APIFreaks API key — get one at [apifreaks.com](https://apifreaks.com) |
+| `APIFREAKS_MODULES` | Yes | Comma-separated list of modules to expose. If unset or empty, only `list_modules` is listed (no API tools). See [Modules](#modules). |
+
+---
+
+## Modules
+
+This server covers many APIs (50+ tools today, growing). Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
+
+Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`, which tells the client to add `APIFREAKS_MODULES` and restart.
+
+```bash
+APIFREAKS_MODULES=weather,whois,dns
+```
+
+Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both work). Unknown names are ignored and logged to stderr.
+
+| Module | Tools |
+|---|---|
+| `weather` | Current, forecast, historical, air quality, marine, flood |
+| `currency` | Live/historical rates, converters, time series, symbols |
+| `ip-intelligence` | IP geolocation and threat intelligence (single + bulk) |
+| `whois` | Domain, IP, ASN, history, reverse, bulk |
+| `dns` | Live lookup, history, reverse, bulk |
+| `domain` | Availability checks, suggestions, bulk |
+| `ssl` | Live certificate and full chain |
+| `commodity` | Symbols, quotes, latest/historical rates, fluctuation, time series |
+| `zipcode` | Lookup, radius, distance, city/region |
+| `timezone` | Lookup and convert |
+| `screenshot` | Capture, scrolling capture, bulk |
+| `user-agent` | Parse single or bulk user-agent strings |
+| `astronomy` | Sunrise, sunset, moon phase, and related solar/lunar data |
 
 ---
 
@@ -74,10 +106,10 @@ Full API documentation: [apifreaks.com/docs](https://apifreaks.com/docs)
 The fastest way to connect it — via the Claude Code CLI:
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=weather,whois -- npx -y @apifreaks/mcp
 ```
 
-That's it. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
+Replace `weather,whois` with the [modules](#modules) you need. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
 
 ---
 
@@ -88,7 +120,7 @@ That's it. For Cursor, Windsurf, Cline, and others see the [Integration Guides](
 **Via terminal (recommended):**
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=weather,whois -- npx -y @apifreaks/mcp
 ```
 
 **Via config file** (`~/.claude/settings.json`):
@@ -100,7 +132,8 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifre
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -112,7 +145,7 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifre
 ### Codex CLI
 
 ```bash
-codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifreaks/mcp
+codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here --env APIFREAKS_MODULES=weather,whois -- npx -y @apifreaks/mcp
 ```
 
 Start a new Codex session after adding the server.
@@ -133,7 +166,8 @@ Edit `claude_desktop_config.json`:
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -155,7 +189,8 @@ Create or edit `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` 
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -177,7 +212,8 @@ Edit `~/.codeium/windsurf/mcp_config.json`:
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -201,7 +237,8 @@ Open the **MCP Servers** panel in Cline, click **Configure**, then **Advanced MC
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -224,7 +261,8 @@ Edit `~/.config/opencode/config.json`:
       "type": "local",
       "command": ["npx", "-y", "@apifreaks/mcp"],
       "environment": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -244,7 +282,8 @@ Edit `~/.gemini/settings.json` (or `.gemini/settings.json` in your project root 
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -265,7 +304,8 @@ Create `.vscode/mcp.json` in your workspace:
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "weather,whois"
       }
     }
   }
@@ -284,7 +324,7 @@ Click **Connect** on the Glama listing page and follow the prompts — it will g
 
 ## Available Tools
 
-### Weather — 8 tools
+### Weather (`weather`) — 8 tools
 
 Real-time conditions, forecasts, historical data, and environmental monitoring.
 
@@ -301,7 +341,7 @@ Real-time conditions, forecasts, historical data, and environmental monitoring.
 
 ---
 
-### Currency — 10 tools
+### Currency (`currency`) — 10 tools
 
 Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurrencies.
 
@@ -320,7 +360,7 @@ Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurre
 
 ---
 
-### IP Intelligence — 4 tools
+### IP Intelligence (`ip-intelligence`) — 4 tools
 
 Geolocation, ISP, network, and threat data for any IP address.
 
@@ -333,7 +373,7 @@ Geolocation, ISP, network, and threat data for any IP address.
 
 ---
 
-### WHOIS — 6 tools
+### WHOIS (`whois`) — 6 tools
 
 Domain and IP ownership data including historical records.
 
@@ -348,7 +388,7 @@ Domain and IP ownership data including historical records.
 
 ---
 
-### DNS — 4 tools
+### DNS (`dns`) — 4 tools
 
 Live DNS records, history, and reverse lookups.
 
@@ -361,7 +401,7 @@ Live DNS records, history, and reverse lookups.
 
 ---
 
-### Domain — 3 tools
+### Domain (`domain`) — 3 tools
 
 Domain availability checks with bulk support and suggestions.
 
@@ -373,7 +413,7 @@ Domain availability checks with bulk support and suggestions.
 
 ---
 
-### SSL — 2 tools
+### SSL (`ssl`) — 2 tools
 
 Live SSL certificate data for any domain.
 
@@ -384,7 +424,7 @@ Live SSL certificate data for any domain.
 
 ---
 
-### Commodity — 7 tools
+### Commodity (`commodity`) — 7 tools
 
 Real-time and historical prices for commodities like gold, oil, and agricultural products.
 
@@ -400,7 +440,7 @@ Real-time and historical prices for commodities like gold, oil, and agricultural
 
 ---
 
-### ZIP Code — 7 tools
+### ZIP Code (`zipcode`) — 7 tools
 
 Postal code lookups, radius searches, and distance calculations worldwide.
 
@@ -416,7 +456,7 @@ Postal code lookups, radius searches, and distance calculations worldwide.
 
 ---
 
-### Timezone — 2 tools
+### Timezone (`timezone`) — 2 tools
 
 Timezone lookups and conversions using any location identifier.
 
@@ -427,7 +467,7 @@ Timezone lookups and conversions using any location identifier.
 
 ---
 
-### Screenshot — 3 tools
+### Screenshot (`screenshot`) — 3 tools
 
 Capture screenshots and scrolling recordings of any webpage.
 
@@ -439,7 +479,7 @@ Capture screenshots and scrolling recordings of any webpage.
 
 ---
 
-### User Agent — 2 tools
+### User Agent (`user-agent`) — 2 tools
 
 Parse user-agent strings to extract browser, OS, and device information.
 
@@ -450,7 +490,7 @@ Parse user-agent strings to extract browser, OS, and device information.
 
 ---
 
-### Astronomy — 1 tool
+### Astronomy (`astronomy`) — 1 tool
 
 Solar and lunar data for any location and date.
 

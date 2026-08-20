@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { type Params, type Body } from "./constants.js";
 import { validateApiKey } from "./auth.js";
+import { ENV } from "./env.js";
 
 const APIFREAKS_BASE_URL = "https://api.apifreaks.com";
 
@@ -37,7 +38,7 @@ export async function callApi(
   if (!validateApiKey(apiKey)) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      "APIFREAKS_API_KEY is not set or invalid. Set the APIFREAKS_API_KEY environment variable to your 32-character API key from apifreaks.com dashboard.",
+      `${ENV.API_KEY} is not set or invalid. Set the ${ENV.API_KEY} environment variable to your 32-character API key from apifreaks.com dashboard.`,
     );
   }
   const queryParams = { ...params, apiKey };
