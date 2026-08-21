@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ENDPOINTS } from "../endpoints.js";
 import { callApi } from "../client.js";
-import { ForecastPrecision, HistoricalPrecision } from "../enums.js";
+import { ForecastPrecision, GeoLang, HistoricalPrecision } from "../enums.js";
 import { requireIpOrLocation } from "../utils/location.js";
 import { READ_ONLY, Params } from "../constants.js";
 
@@ -53,52 +53,6 @@ export function register(server: McpServer, apiKey: string): void {
     async ({ location, lat, long, ip, time_zone }) => {
       const params = buildLocationParams(location, lat, long, ip, time_zone);
       const data = await callApi(ENDPOINTS.WEATHER_CURRENT, apiKey, params);
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(data) }],
-      };
-    },
-  );
-
-  server.registerTool(
-    "weather_bulk_current",
-    {
-      title: "Bulk Current Weather",
-      description:
-        "Get real-time weather for up to 50 locations at once. " +
-        "Each location in the array can be a city name, lat/long pair, or IP address. " +
-        "Returns weather + astronomy data for each location wrapped in a 'bulk' array.",
-      inputSchema: z.object({
-        locations: z
-          .array(
-            z.object({
-              location: z.string().optional().describe(LOC_DESC),
-              lat: z.number().min(-90).max(90).optional().describe(LAT_DESC),
-              long: z
-                .number()
-                .min(-180)
-                .max(180)
-                .optional()
-                .describe(LONG_DESC),
-              ip: z.string().optional().describe(IP_DESC),
-            }),
-          )
-          .max(50)
-          .describe(
-            "Array of location objects (max 50). Each object can contain: " +
-              '"location" (string), "lat"+"long" (floats), or "ip" (string). ' +
-              'Example: [{"location":"London"},{"lat":48.85,"long":2.35},{"ip":"8.8.8.8"}]',
-          ),
-      }),
-      annotations: READ_ONLY,
-    },
-    async ({ locations }) => {
-      const data = await callApi(
-        ENDPOINTS.WEATHER_CURRENT,
-        apiKey,
-        {},
-        { locations },
-        "POST",
-      );
       return {
         content: [{ type: "text" as const, text: JSON.stringify(data) }],
       };
@@ -399,6 +353,103 @@ export function register(server: McpServer, apiKey: string): void {
       params["startDate"] = start_date;
       params["endDate"] = end_date;
       const data = await callApi(ENDPOINTS.WEATHER_FLOOD, apiKey, params);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "weather_bulk_current",
+    {
+      title: "Bulk Current Weather",
+      description:
+        "Get real-time weather for up to 50 locations at once. " +
+        "Each location in the array can be a city name, lat/long pair, or IP address. " +
+        "Returns weather + astronomy data for each location wrapped in a 'bulk' array.",
+      inputSchema: z.object({
+        locations: z
+          .array(
+            z.object({
+              location: z.string().optional().describe(LOC_DESC),
+              lat: z.number().min(-90).max(90).optional().describe(LAT_DESC),
+              long: z
+                .number()
+                .min(-180)
+                .max(180)
+                .optional()
+                .describe(LONG_DESC),
+              ip: z.string().optional().describe(IP_DESC),
+            }),
+          )
+          .max(50)
+          .describe(
+            "Array of location objects (max 50). Each object can contain: " +
+              '"location" (string), "lat"+"long" (floats), or "ip" (string). ' +
+              'Example: [{"location":"London"},{"lat":48.85,"long":2.35},{"ip":"8.8.8.8"}]',
+          ),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ locations }) => {
+      const data = await callApi(
+        ENDPOINTS.WEATHER_CURRENT,
+        apiKey,
+        {},
+        { locations },
+        "POST",
+      );
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "astronomy_lookup",
+    {
+      title: "Astronomy Lookup",
+      description:
+        "Get astronomy data for a location and date: sunrise/sunset, moon phase, twilight, " +
+        "golden/blue hour, solar noon, moonrise/moonset, and sun/moon position metrics. " +
+        "Provide one of: ip, location, or lat+long. At least one is required. " +
+        "Date format: YYYY-MM-DD (past or future), defaulting to today.",
+      inputSchema: z.object({
+        location: z.string().optional().describe(LOC_DESC),
+        lat: z.number().min(-90).max(90).optional().describe(LAT_DESC),
+        long: z.number().min(-180).max(180).optional().describe(LONG_DESC),
+        ip: z.string().optional().describe(IP_DESC),
+        date: z
+          .string()
+          .optional()
+          .describe(
+            "Date in YYYY-MM-DD format. Accepts past or future dates. Defaults to today.",
+          ),
+        elevation: z
+          .number()
+          .min(0)
+          .max(10_000)
+          .default(0)
+          .describe(
+            "Elevation above sea level in meters (0–10,000). Defaults to 0.",
+          ),
+        time_zone: z.string().optional().describe(TZ_DESC),
+        lang: GeoLang.default("en").describe(
+          "Language for location name fields. Defaults to English.",
+        ),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ location, lat, long, ip, date, elevation, time_zone, lang }) => {
+      requireIpOrLocation(ip, location, lat, long);
+      const params: Params = { lang, elevation };
+      if (location !== undefined) params["location"] = location;
+      if (lat !== undefined) params["lat"] = lat;
+      if (long !== undefined) params["long"] = long;
+      if (ip !== undefined) params["ip"] = ip;
+      if (date !== undefined) params["date"] = date;
+      if (time_zone !== undefined) params["time_zone"] = time_zone;
+      const data = await callApi(ENDPOINTS.GEO_ASTRONOMY, apiKey, params);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(data) }],
       };

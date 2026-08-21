@@ -3,7 +3,7 @@
   "name": "io.github.api-freaks/apifreaks-mcp",
   "title": "APIFreaks MCP",
   "description": "The official MCP server for APIFreaks, connecting your AI to the full range of APIFreaks APIs.",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "websiteUrl": "https://apifreaks.com/integrations/mcp-server",
   "repository": {
     "url": "https://github.com/api-freaks/apifreaks-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "@apifreaks/mcp",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "runtimeHint": "npx",
       "transport": { "type": "stdio" },
       "environmentVariables": [
@@ -22,6 +22,12 @@
           "description": "Your APIFreaks API key — get one free at apifreaks.com",
           "isRequired": true,
           "isSecret": true
+        },
+        {
+          "name": "APIFREAKS_MODULES",
+          "description": "Comma-separated modules to expose as tools (e.g. ip-intelligence,whois,dns,weather). If unset, only list_modules is advertised. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
+          "isRequired": true,
+          "isSecret": false
         }
       ]
     }

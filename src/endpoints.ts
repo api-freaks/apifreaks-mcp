@@ -46,6 +46,7 @@ export const ENDPOINTS = {
   // Domain
   DOMAIN_AVAILABILITY: "/v1.0/domain/availability",
   DOMAIN_AVAILABILITY_SUGGESTIONS: "/v1.0/domain/availability/suggestions",
+  DOMAIN_SUBDOMAIN_LOOKUP: "/v1.0/subdomains/lookup",
 
   // Currency
   CURRENCY_RATES_LATEST: "/v1.0/currency/rates/latest",
@@ -57,6 +58,7 @@ export const ENDPOINTS = {
   CURRENCY_GEO_CONVERT: "/v1.0/currency/converter/ip-to-currency",
   CURRENCY_SUPPORTED: "/v1.0/currency/supported",
   CURRENCY_SYMBOLS: "/v1.0/currency/symbols",
+  CURRENCY_HISTORICAL_DATA_LIMITS: "/v1.0/currency/historical/data/limits",
 
   // ZIP Code
   ZIPCODE_LOOKUP: "/v1.0/zipcode/lookup",
@@ -69,6 +71,67 @@ export const ENDPOINTS = {
   // Screenshot
   SCREENSHOT: "/v1.0/screenshot",
 
-} as const;
+  // Scraper
+  SCRAPING: "/v1.0/scraping",
 
-export type Endpoint = (typeof ENDPOINTS)[keyof typeof ENDPOINTS];
+  // Financial
+  SWIFT_LOOKUP: "/v1.0/swift-code/lookup",
+  SWIFT_FINDER: "/v1.0/swift-code/finder",
+  IBAN_VALIDATION: "/v1.0/iban/validation",
+  VAT_VALIDATION: "/v1.0/vat/validation",
+  VAT_RATES_COUNTRY: "/v1.0/vat/rates/country",
+  VAT_RATES_IP: "/v1.0/vat/rates/ip-address",
+  FINANCIAL_SUPPORTED_COUNTRIES: "/v1.0/vat/supported-countries",
+
+  // Email validation
+  EMAIL_VALIDATION_SINGLE: "/v1.0/email-validation/single",
+  EMAIL_VALIDATION_BULK: "/v1.0/email-validation/bulk",
+
+  // Phone validation
+  PHONE_VALIDATION: "/v1.0/phone/validation",
+  PHONE_VALIDATION_BULK: "/v1.0/phone/validation/bulk",
+
+  // Geocoding
+  GEOCODER_SEARCH: "/v1.0/geocoder/search",
+  GEOCODER_REVERSE: "/v1.0/geocoder/reverse",
+
+  // GeoDB
+  GEO_COUNTRIES: "/v1.0/geo/countries",
+  GEO_COUNTRY_DETAILS: "/v1.0/geo/country/details",
+  GEO_REGIONS: "/v1.0/geo/regions",
+  GEO_SUBREGIONS: "/v1.0/geo/subregions",
+  GEO_CITIES: "/v1.0/geo/cities",
+  GEO_ADMIN_UNITS: "/v1.0/geo/admin-units",
+  GEO_ADMIN_UNIT_DETAILS: "/v1.0/geo/admin-unit/details",
+  GEO_ADMIN_LEVELS: "/v1.0/geo/admin-levels",
+  GEO_FLAGS: "/v1.0/flags",
+  GEO_FLAGS_SUPPORTED: "/v1.0/flags/supported",
+
+  // PDF
+  PDF_MERGE: "/v1.0/pdf/merge",
+  PDF_SPLIT: "/v1.0/pdf/split",
+  PDF_EXTRACT_PAGES: "/v1.0/pdf/extract-pages",
+  PDF_REMOVE_PAGES: "/v1.0/pdf/remove-pages",
+  PDF_PNG: "/v1.0/pdf/png",
+  PDF_JPG: "/v1.0/pdf/jpg",
+  PDF_TIF: "/v1.0/pdf/tif",
+  PDF_BMP: "/v1.0/pdf/bmp",
+  PDF_GIF: "/v1.0/pdf/gif",
+  PDF_COMPRESS: "/v1.0/pdf/compress",
+  PDF_ROTATE: "/v1.0/pdf/rotate",
+  PDF_ENCRYPT: "/v1.0/pdf/encrypt",
+  PDF_RESTRICT: "/v1.0/pdf/restrict",
+  PDF_DECRYPT: "/v1.0/pdf/decrypt",
+  PDF_UNRESTRICT: "/v1.0/pdf/unrestrict",
+  PDF_LINEARIZE: "/v1.0/pdf/linearize",
+  PDF_GENERATE: "/v1.0/pdf/template/generate",
+  PDF_GENERATE_BULK: "/v1.0/pdf/template/generate/bulk",
+  PDF_UPLOAD: "/v1.0/pdf/resource/upload",
+  PDF_UPLOAD_BINARY: "/v1.0/pdf/resource/upload-binary",
+  PDF_DOWNLOAD: "/v1.0/pdf/resource/download",
+  PDF_TASK_STATUS: "/v1.0/pdf/task-status",
+  PDF_FILE_STATUS: "/v1.0/pdf/file-status",
+  PDF_FILES: "/v1.0/pdf/files",
+  PDF_FILE_DELETE: "/v1.0/pdf/file",
+
+} as const;

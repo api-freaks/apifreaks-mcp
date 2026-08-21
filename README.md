@@ -7,7 +7,7 @@
 [![CI](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-16A34A)](https://github.com/api-freaks/apifreaks-mcp/blob/main/LICENSE)
 
-The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, and more.
+The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, PDFs, web scrapes, VAT/IBAN/SWIFT, email and phone validation, geocoding, and more.
 
 **What can you ask once it's connected?**
 
@@ -26,6 +26,7 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 
 - [Requirements](#requirements)
 - [Environment Variables](#environment-variables)
+- [Modules](#modules)
 - [Getting Your API Key](#getting-your-api-key)
 - [Quick Start](#quick-start)
 - [Integration Guides](#integration-guides)
@@ -58,6 +59,43 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 | Variable | Required | Description |
 |---|---|---|
 | `APIFREAKS_API_KEY` | Yes | Your APIFreaks API key — get one at [apifreaks.com](https://apifreaks.com) |
+| `APIFREAKS_MODULES` | Yes | Comma-separated list of modules to expose. If unset or empty, only `list_modules` is listed (no API tools). See [Modules](#modules). |
+
+---
+
+## Modules
+
+This server covers many APIs. Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
+
+Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then paste a full `APIFREAKS_MODULES=...` line (every module you want, not only the new name) and restart.
+
+```bash
+APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather
+```
+
+Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both work). Unknown names are ignored and logged to stderr.
+
+| Module | Tools |
+|---|---|
+| `ip-intelligence` | IP geolocation and threat intelligence (single + bulk) |
+| `geocoding` | Forward and reverse geocoding |
+| `whois` | Domain, IP, ASN, history, reverse, bulk |
+| `dns` | Live lookup, history, reverse, bulk |
+| `scraper` | Static HTML scrape and JS-rendered scrape |
+| `email-validation` | Single and bulk email validation |
+| `phone-validation` | Single and bulk phone validation |
+| `ssl` | Live certificate and full chain |
+| `domain` | Availability checks, suggestions, bulk, subdomain lookup |
+| `screenshot` | Capture, scrolling capture, bulk |
+| `pdf` | Merge, split, compress, protect, generate, convert |
+| `currency` | Live/historical rates, converters, time series, symbols, limits |
+| `commodity` | Live/historical prices, fluctuation, time series, symbols |
+| `financial` | VAT rates, VAT numbers, IBAN, SWIFT/BIC |
+| `zipcode` | Lookup, radius, distance, city/region |
+| `weather` | Current, forecast, historical, air quality, marine, flood, astronomy |
+| `geography` | Admin units, countries, cities, regions, flags |
+| `timezone` | Lookup and convert |
+| `user-agent` | Parse single or bulk user-agent strings |
 
 ---
 
@@ -74,10 +112,10 @@ Full API documentation: [apifreaks.com/docs](https://apifreaks.com/docs)
 The fastest way to connect it — via the Claude Code CLI:
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
-That's it. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
+Replace `ip-intelligence,currency,whois,dns,weather` with the [modules](#modules) you need. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
 
 ---
 
@@ -88,7 +126,7 @@ That's it. For Cursor, Windsurf, Cline, and others see the [Integration Guides](
 **Via terminal (recommended):**
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 **Via config file** (`~/.claude/settings.json`):
@@ -100,7 +138,8 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifre
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -112,7 +151,7 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifre
 ### Codex CLI
 
 ```bash
-codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here -- npx -y @apifreaks/mcp
+codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here --env APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 Start a new Codex session after adding the server.
@@ -133,7 +172,8 @@ Edit `claude_desktop_config.json`:
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -155,7 +195,8 @@ Create or edit `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` 
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -177,7 +218,8 @@ Edit `~/.codeium/windsurf/mcp_config.json`:
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -201,7 +243,8 @@ Open the **MCP Servers** panel in Cline, click **Configure**, then **Advanced MC
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -224,7 +267,8 @@ Edit `~/.config/opencode/config.json`:
       "type": "local",
       "command": ["npx", "-y", "@apifreaks/mcp"],
       "environment": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -244,7 +288,8 @@ Edit `~/.gemini/settings.json` (or `.gemini/settings.json` in your project root 
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -265,7 +310,8 @@ Create `.vscode/mcp.json` in your workspace:
       "command": "npx",
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
-        "APIFREAKS_API_KEY": "your_apikey_here"
+        "APIFREAKS_API_KEY": "your_apikey_here",
+        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -284,24 +330,161 @@ Click **Connect** on the Glama listing page and follow the prompts — it will g
 
 ## Available Tools
 
-### Weather — 8 tools
+### IP Intelligence (`ip-intelligence`) — 4 tools
 
-Real-time conditions, forecasts, historical data, and environmental monitoring.
+Geolocation, ISP, network, and threat data for any IP address.
 
 | Tool | Description |
 |---|---|
-| `weather_current` | Current weather for any location — temperature, humidity, wind, pressure, AQI |
-| `weather_bulk_current` | Current weather for up to 50 locations in one request |
-| `weather_forecast` | Forecast up to 16 days ahead with daily, hourly, or minutely precision |
-| `weather_historical` | Historical weather for any past date (data back to 1940) |
-| `weather_time_series` | Historical weather over a custom date range |
-| `weather_air_quality` | Real-time or forecast air quality index and pollutant breakdown |
-| `weather_marine` | Marine and ocean weather, real-time or forecast up to 16 days |
-| `weather_flood_forecast` | Flood forecast with river discharge and flow percentile data |
+| `ipgeolocation_lookup` | Geolocation data for an IP, IPv6 address, or hostname |
+| `ipgeolocation_bulk_lookup` | Geolocation data for up to 50,000 IPs in one request |
+| `ip_security_lookup` | Threat score, VPN/proxy/Tor/bot detection for a single IP |
+| `ip_security_bulk_lookup` | Threat intelligence for up to 50,000 IPs in one request |
 
 ---
 
-### Currency — 10 tools
+### Geocoding (`geocoding`) — 2 tools
+
+Address ↔ coordinate conversion.
+
+| Tool | Description |
+|---|---|
+| `geocode_forward` | Convert an address or place name into coordinates |
+| `geocode_reverse` | Convert coordinates into a street address |
+
+---
+
+### WHOIS (`whois`) — 6 tools
+
+Domain and IP ownership data including historical records.
+
+| Tool | Description |
+|---|---|
+| `whois_domain_lookup` | Live WHOIS record for a domain name |
+| `whois_ip_lookup` | WHOIS ownership and network data for an IPv4 or IPv6 address |
+| `whois_asn_lookup` | WHOIS data for an Autonomous System Number (ASN) |
+| `whois_domain_history` | Historical WHOIS snapshots for a domain (data back to 1986) |
+| `whois_reverse_lookup` | Search WHOIS records by owner name, email, company, or keyword |
+| `whois_bulk_domain_lookup` | Live WHOIS data for up to 100 domains at once |
+
+---
+
+### DNS (`dns`) — 4 tools
+
+Live DNS records, history, and reverse lookups.
+
+| Tool | Description |
+|---|---|
+| `dns_lookup` | Real-time DNS records for a hostname — A, AAAA, MX, NS, TXT, CNAME, SOA, SPF |
+| `dns_history` | Historical DNS record snapshots for a hostname |
+| `dns_reverse` | Find all hostnames pointing to a specific DNS record value |
+| `dns_bulk_lookup` | Real-time DNS records for up to 100 hostnames at once |
+
+---
+
+### Scraper (`scraper`) — 2 tools
+
+Extract HTML or structured fields from a URL. Static mode first; JS rendering only when the page needs a browser.
+
+| Tool | Description |
+|---|---|
+| `scraper_scrape` | Scrape static HTML (optional extract / form submit). Empty instructions return the full page |
+| `scraper_scrape_js` | Scrape with JavaScript rendering, browser steps, proxies, and optional CAPTCHA solving |
+
+---
+
+### Email Validation (`email-validation`) — 2 tools
+
+Deliverability, syntax, domain, and optional IP enrichment.
+
+| Tool | Description |
+|---|---|
+| `email_validate` | Validate a single email address |
+| `email_bulk_validate` | Validate up to 100 email addresses in one request |
+
+---
+
+### Phone Validation (`phone-validation`) — 2 tools
+
+Carrier, line type, location, and standardized formats.
+
+| Tool | Description |
+|---|---|
+| `phone_validate` | Validate a single phone number |
+| `phone_bulk_validate` | Validate up to 100 phone numbers in one request |
+
+---
+
+### SSL (`ssl`) — 2 tools
+
+Live SSL certificate data for any domain.
+
+| Tool | Description |
+|---|---|
+| `ssl_live_lookup` | Retrieve the live SSL certificate for a domain |
+| `ssl_live_chain_lookup` | Retrieve the complete SSL certificate chain for a domain |
+
+---
+
+### Domain (`domain`) — 4 tools
+
+Domain availability checks with bulk support, suggestions, and subdomain discovery.
+
+| Tool | Description |
+|---|---|
+| `domain_check_availability` | Check whether a domain name is available for registration |
+| `domain_check_availability_with_suggestions` | Check availability and get alternative domain suggestions |
+| `domain_subdomain_lookup` | Paginated list of discovered subdomains for a domain |
+| `domain_bulk_check_availability` | Check availability for up to 100 domains at once |
+
+---
+
+### Screenshot (`screenshot`) — 3 tools
+
+Capture screenshots and scrolling recordings of any webpage.
+
+| Tool | Description |
+|---|---|
+| `screenshot_capture` | Capture a screenshot of a webpage and return the image URL |
+| `screenshot_bulk_capture` | Capture screenshots of up to 50 webpages in one request |
+| `screenshot_capture_scrolling` | Record a scrolling video or animated GIF of a webpage |
+
+---
+
+### PDF (`pdf`) — 20 tools
+
+Merge, split, extract or remove pages, convert to images, generate from templates, compress, rotate, encrypt/restrict, decrypt/unrestrict, and linearize.
+
+Jobs (merge, split, convert, …) are asynchronous: they return a `taskId`. Check progress with `pdf_task_status`. Local files need an **absolute** path (the MCP server reads the disk). You can also pass a stored `file_id`. Template generation (`pdf_generate`, `pdf_generate_bulk`) is synchronous and returns a hosted `pdf_url`.
+
+Completed jobs include download URLs. Add your API key as the `apiKey` query parameter or the `X-apiKey` header.
+
+| Tool | Description |
+|---|---|
+| `pdf_merge` | Merge PDFs (local paths and/or stored file IDs) |
+| `pdf_split` | Split a PDF by page ranges |
+| `pdf_extract_pages` | Extract pages into a new PDF or ZIP |
+| `pdf_remove_pages` | Remove pages from a PDF |
+| `pdf_to_image` | Convert pages to PNG, JPG, TIFF, BMP, or GIF |
+| `pdf_generate` | Render a template with JSON and get a hosted PDF URL |
+| `pdf_generate_bulk` | Render one PDF per CSV row |
+| `pdf_compress` | Reduce PDF file size |
+| `pdf_rotate` | Rotate pages |
+| `pdf_encrypt` | Password-protect a PDF |
+| `pdf_restrict` | Restrict printing, copying, and editing |
+| `pdf_decrypt` | Remove encryption |
+| `pdf_unrestrict` | Remove permission restrictions |
+| `pdf_linearize` | Linearize for Fast Web View |
+| `pdf_task_status` | Check one async job (`queued` / `processing` / `completed` / `failed`) |
+| `pdf_file_status` | Metadata for a stored file |
+| `pdf_files` | List stored PDFs |
+| `pdf_file_delete` | Delete a stored PDF |
+| `pdf_upload` | Upload local PDFs and get file IDs |
+| `pdf_upload_binary` | Upload one large PDF as raw bytes and get a file ID |
+
+---
+
+### Currency (`currency`) — 12 tools
 
 Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurrencies.
 
@@ -317,106 +500,99 @@ Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurre
 | `currency_supported` | Full list of supported currencies with metadata |
 | `currency_symbols` | Map of currency symbols to currency names |
 | `currency_symbol_info` | Validate a currency symbol and get its full name |
+| `currency_historical_data_limits` | Historical data availability window for every currency |
+| `currency_historical_data_limit_info` | Historical data availability window for one currency code |
 
 ---
 
-### IP Intelligence — 4 tools
-
-Geolocation, ISP, network, and threat data for any IP address.
-
-| Tool | Description |
-|---|---|
-| `ipgeolocation_lookup` | Geolocation data for an IP, IPv6 address, or hostname |
-| `ipgeolocation_bulk_lookup` | Geolocation data for up to 50,000 IPs in one request |
-| `ip_security_lookup` | Threat score, VPN/proxy/Tor/bot detection for a single IP |
-| `ip_security_bulk_lookup` | Threat intelligence for up to 50,000 IPs in one request |
-
----
-
-### WHOIS — 6 tools
-
-Domain and IP ownership data including historical records.
-
-| Tool | Description |
-|---|---|
-| `whois_domain_lookup` | Live WHOIS record for a domain name |
-| `whois_ip_lookup` | WHOIS ownership and network data for an IPv4 or IPv6 address |
-| `whois_asn_lookup` | WHOIS data for an Autonomous System Number (ASN) |
-| `whois_domain_history` | Historical WHOIS snapshots for a domain (data back to 1986) |
-| `whois_reverse_lookup` | Search WHOIS records by owner name, email, company, or keyword |
-| `whois_bulk_domain_lookup` | Live WHOIS data for up to 100 domains at once |
-
----
-
-### DNS — 4 tools
-
-Live DNS records, history, and reverse lookups.
-
-| Tool | Description |
-|---|---|
-| `dns_lookup` | Real-time DNS records for a hostname — A, AAAA, MX, NS, TXT, CNAME, SOA, SPF |
-| `dns_history` | Historical DNS record snapshots for a hostname |
-| `dns_reverse` | Find all hostnames pointing to a specific DNS record value |
-| `dns_bulk_lookup` | Real-time DNS records for up to 100 hostnames at once |
-
----
-
-### Domain — 3 tools
-
-Domain availability checks with bulk support and suggestions.
-
-| Tool | Description |
-|---|---|
-| `domain_check_availability` | Check whether a domain name is available for registration |
-| `domain_check_availability_with_suggestions` | Check availability and get alternative domain suggestions |
-| `domain_bulk_check_availability` | Check availability for up to 100 domains at once |
-
----
-
-### SSL — 2 tools
-
-Live SSL certificate data for any domain.
-
-| Tool | Description |
-|---|---|
-| `ssl_live_lookup` | Retrieve the live SSL certificate for a domain |
-| `ssl_live_chain_lookup` | Retrieve the complete SSL certificate chain for a domain |
-
----
-
-### Commodity — 7 tools
+### Commodity (`commodity`) — 7 tools
 
 Real-time and historical prices for commodities like gold, oil, and agricultural products.
 
 | Tool | Description |
 |---|---|
-| `commodity_symbols` | List all supported commodity symbols with metadata |
-| `commodity_symbol_info` | Validate a commodity symbol and get its full details |
-| `commodity_quotes` | List all supported quote currencies for commodity pricing |
 | `commodity_latest_rates` | Real-time prices for one or more commodities |
 | `commodity_historical_rates` | Historical OHLC prices for commodities on a specific date |
 | `commodity_fluctuation` | Price fluctuation metrics over a date range |
 | `commodity_time_series` | Daily OHLC prices over a date range (up to 365 days) |
+| `commodity_symbols` | List all supported commodity symbols with metadata |
+| `commodity_symbol_info` | Validate a commodity symbol and get its full details |
+| `commodity_quotes` | List all supported quote currencies for commodity pricing |
 
 ---
 
-### ZIP Code — 7 tools
+### Financial (`financial`) — 9 tools
+
+VAT rates, VAT-number checks, IBAN validation, and SWIFT/BIC lookup.
+
+| Tool | Description |
+|---|---|
+| `financial_vat_rates_by_country` | VAT rates for a country, optionally by state |
+| `financial_vat_rates_bulk` | VAT rates for up to 100 countries/states |
+| `financial_vat_rates_by_ip` | VAT rates for the country resolved from an IP address |
+| `financial_vat_validate` | Validate an EU (VIES) or UK (HMRC) VAT number |
+| `financial_iban_validate` | Validate an IBAN (format, checksum, bank/SEPA metadata) |
+| `financial_swift_lookup` | Bank details for an 8- or 11-character SWIFT/BIC code |
+| `financial_swift_finder` | Drill down country → bank → city → SWIFT/BIC codes |
+| `financial_supported_countries` | Countries (and VAT states) supported by VAT, IBAN, and SWIFT APIs |
+| `financial_supported_country_info` | Check whether one country is supported by VAT, IBAN, and/or SWIFT |
+
+---
+
+### ZIP Code (`zipcode`) — 7 tools
 
 Postal code lookups, radius searches, and distance calculations worldwide.
 
 | Tool | Description |
 |---|---|
 | `zipcode_lookup` | Look up a ZIP or postal code — city, region, country, coordinates |
-| `zipcode_bulk_lookup` | Look up up to 100 ZIP/postal codes at once |
 | `zipcode_radius_search` | Find all ZIP codes within a given radius of a center point |
 | `zipcode_distance` | Calculate distance from a base point to up to 100 ZIP codes |
-| `zipcode_distance_match` | Find all ZIP code pairs within a given distance threshold |
 | `zipcode_by_city` | Get all ZIP/postal codes for a city |
+| `zipcode_bulk_lookup` | Look up up to 100 ZIP/postal codes at once |
+| `zipcode_distance_match` | Find all ZIP code pairs within a given distance threshold |
 | `zipcode_by_region` | Get all ZIP/postal codes for a state, province, or region |
 
 ---
 
-### Timezone — 2 tools
+### Weather (`weather`) — 9 tools
+
+Real-time conditions, forecasts, historical data, environmental monitoring, and astronomy.
+
+| Tool | Description |
+|---|---|
+| `weather_current` | Current weather for any location — temperature, humidity, wind, pressure, AQI |
+| `weather_forecast` | Forecast up to 16 days ahead with daily, hourly, or minutely precision |
+| `weather_historical` | Historical weather for any past date (data back to 1940) |
+| `weather_time_series` | Historical weather over a custom date range |
+| `weather_air_quality` | Real-time or forecast air quality index and pollutant breakdown |
+| `weather_marine` | Marine and ocean weather, real-time or forecast up to 16 days |
+| `weather_flood_forecast` | Flood forecast with river discharge and flow percentile data |
+| `weather_bulk_current` | Current weather for up to 50 locations in one request |
+| `astronomy_lookup` | Sunrise, sunset, moon phase, twilight, golden hour, solar noon, moonrise, and sun/moon positions |
+
+---
+
+### Geography (`geography`) — 10 tools
+
+Countries, cities, administrative units, regions, and flag images.
+
+| Tool | Description |
+|---|---|
+| `geodb_admin_levels` | Administrative level types for a country |
+| `geodb_admin_units` | States, provinces, and other admin units for a country |
+| `geodb_admin_unit_details` | Details for one administrative unit |
+| `geodb_countries` | List countries with ISO codes, capitals, and regions |
+| `geodb_country_details` | Full metadata for one country by alpha-2 code |
+| `geodb_cities` | Cities for a country, optionally filtered by admin unit |
+| `geodb_regions` | List GeoDB regions (Africa, Americas, Asia, Europe, Oceania, Polar) |
+| `geodb_subregions` | List subregions, optionally filtered by region |
+| `geodb_flags_supported` | Supported country and organization flag identifiers |
+| `geodb_flag` | Retrieve a country or organization flag image |
+
+---
+
+### Timezone (`timezone`) — 2 tools
 
 Timezone lookups and conversions using any location identifier.
 
@@ -427,19 +603,7 @@ Timezone lookups and conversions using any location identifier.
 
 ---
 
-### Screenshot — 3 tools
-
-Capture screenshots and scrolling recordings of any webpage.
-
-| Tool | Description |
-|---|---|
-| `screenshot_capture` | Capture a screenshot of a webpage and return the image URL |
-| `screenshot_capture_scrolling` | Record a scrolling video or animated GIF of a webpage |
-| `screenshot_bulk_capture` | Capture screenshots of up to 50 webpages in one request |
-
----
-
-### User Agent — 2 tools
+### User Agent (`user-agent`) — 2 tools
 
 Parse user-agent strings to extract browser, OS, and device information.
 
@@ -447,16 +611,6 @@ Parse user-agent strings to extract browser, OS, and device information.
 |---|---|
 | `user_agent_parse` | Parse a user-agent string — browser, device, OS, engine |
 | `user_agent_bulk_parse` | Parse up to 100 user-agent strings in a single request |
-
----
-
-### Astronomy — 1 tool
-
-Solar and lunar data for any location and date.
-
-| Tool | Description |
-|---|---|
-| `astronomy_lookup` | Sunrise, sunset, moon phase, twilight, golden hour, solar noon, moonrise, and sun/moon positions |
 
 ---
 
