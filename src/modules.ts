@@ -8,7 +8,7 @@ import {
   type ModuleName,
   type ModuleTool,
 } from "./module-catalog.js";
-import { register as registerAstronomy } from "./tools/astronomy.js";
+
 import { register as registerCommodity } from "./tools/commodity.js";
 import { register as registerCurrency } from "./tools/currency.js";
 import { register as registerDns } from "./tools/dns.js";
@@ -16,7 +16,7 @@ import { register as registerDomain } from "./tools/domain.js";
 import { register as registerEmailValidation } from "./tools/email-validation.js";
 import { register as registerFinancial } from "./tools/financial.js";
 import { register as registerGeocoding } from "./tools/geocoding.js";
-import { register as registerGeodb } from "./tools/geodb.js";
+import { register as registerGeography } from "./tools/geodb.js";
 import { register as registerIpIntelligence } from "./tools/ip-intelligence.js";
 import { register as registerPhoneValidation } from "./tools/phone-validation.js";
 import { register as registerScraper } from "./tools/scraper.js";
@@ -28,30 +28,27 @@ import { register as registerWeather } from "./tools/weather.js";
 import { register as registerWhois } from "./tools/whois.js";
 import { register as registerZipcode } from "./tools/zipcode.js";
 
-const MODULES: Record<
-  ModuleName,
-  (server: McpServer, apiKey: string) => void
-> = {
-  weather: registerWeather,
-  currency: registerCurrency,
-  "ip-intelligence": registerIpIntelligence,
-  whois: registerWhois,
-  dns: registerDns,
-  domain: registerDomain,
-  ssl: registerSsl,
-  commodity: registerCommodity,
-  zipcode: registerZipcode,
-  timezone: registerTimezone,
-  screenshot: registerScreenshot,
-  scraper: registerScraper,
-  "user-agent": registerUserAgent,
-  astronomy: registerAstronomy,
-  financial: registerFinancial,
-  "email-validation": registerEmailValidation,
-  "phone-validation": registerPhoneValidation,
-  geocoding: registerGeocoding,
-  geodb: registerGeodb,
-};
+const MODULES: Record<ModuleName, (server: McpServer, apiKey: string) => void> =
+  {
+    "ip-intelligence": registerIpIntelligence,
+    geocoding: registerGeocoding,
+    whois: registerWhois,
+    dns: registerDns,
+    scraper: registerScraper,
+    "email-validation": registerEmailValidation,
+    "phone-validation": registerPhoneValidation,
+    ssl: registerSsl,
+    domain: registerDomain,
+    screenshot: registerScreenshot,
+    currency: registerCurrency,
+    commodity: registerCommodity,
+    financial: registerFinancial,
+    zipcode: registerZipcode,
+    weather: registerWeather,
+    geography: registerGeography,
+    timezone: registerTimezone,
+    "user-agent": registerUserAgent,
+  };
 
 export function registerEnabledModules(
   server: McpServer,
@@ -60,13 +57,11 @@ export function registerEnabledModules(
   const { enabled, unknown } = parseEnabledModules();
   registerListModules(server, enabled, unknown);
 
-  // register the modules that are enabled
   for (const name of enabled) {
     MODULES[name](server, apiKey);
   }
 }
 
-// parse the enabled modules from the environment variable and return the enabled and unknown modules
 function parseEnabledModules(): {
   enabled: Array<ModuleName>;
   unknown: Array<string>;
@@ -82,7 +77,10 @@ function parseEnabledModules(): {
 
   for (const token of raw.split(",")) {
     const name = token.trim().toLowerCase().replaceAll("_", "-");
-    if (!name || seen.has(name)) {
+    if (!name) {
+      continue;
+    }
+    if (seen.has(name)) {
       continue;
     }
     seen.add(name);
@@ -96,7 +94,6 @@ function parseEnabledModules(): {
   return { enabled, unknown };
 }
 
-// register the list modules tool that lists the enabled and unknown modules
 function registerListModules(
   server: McpServer,
   enabled: Array<ModuleName>,
@@ -106,7 +103,7 @@ function registerListModules(
     enabled.length === 0
       ? `No APIFreaks API tools are registered because ${ENV.MODULES} is not set. ` +
         `Call this tool to see each module and the tools it contains, then ask the user to add the needed modules to ${ENV.MODULES} and restart. ` +
-        `Example: ${ENV.MODULES}=geodb,weather`
+        `Example: ${ENV.MODULES}=whois,ip-intelligence,geography,weather`
       : `Enabled APIFreaks modules: ${enabled.join(", ")}. ` +
         `Call this tool to see tools in every module if something the user needs is not enabled. ` +
         `To change the set, update ${ENV.MODULES} and restart.`;
@@ -133,7 +130,7 @@ function registerListModules(
               unknown,
               available: MODULE_NAMES,
               modules: moduleCatalogPayload(enabled),
-              example: `${ENV.MODULES}=weather,whois,geodb`,
+              example: `${ENV.MODULES}=ip-intelligence,whois,dns,weather`,
             }),
           },
         ],
@@ -142,7 +139,9 @@ function registerListModules(
   );
 }
 
-function moduleCatalogPayload(enabled: Array<ModuleName>): Record<
+function moduleCatalogPayload(
+  enabled: Array<ModuleName>,
+): Record<
   ModuleName,
   { enabled: boolean; summary: string; tools: Array<ModuleTool> }
 > {

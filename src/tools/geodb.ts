@@ -13,121 +13,6 @@ const FlagSize = z.enum(["16px", "24px", "32px", "48px", "64px"]);
 
 export function register(server: McpServer, apiKey: string): void {
   server.registerTool(
-    "geodb_regions",
-    {
-      title: "GeoDB Regions",
-      description:
-        "List the geographical regions supported by GeoDB. " +
-        "Returns a 'regions' array of exactly 6 names: Africa, Americas, Asia, Europe, Oceania, and Polar. " +
-        "Use a returned name with 'geodb_subregions' to list subregions, or with 'geodb_countries' to filter countries.",
-      inputSchema: z.object({}),
-      annotations: READ_ONLY,
-    },
-    async () => {
-      const data = await callApi(ENDPOINTS.GEO_REGIONS, apiKey);
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(data) }],
-      };
-    },
-  );
-
-  server.registerTool(
-    "geodb_subregions",
-    {
-      title: "GeoDB Subregions",
-      description:
-        "List subregions within a geographical region, or all subregions across every region when 'region' is omitted. " +
-        "Returns a 'subregions' array of names such as Western Europe, Southern Asia, or Northern America. " +
-        "Use 'geodb_regions' for valid region names. An invalid region name returns 400; " +
-        "a region with no subregions (Polar) returns 404.",
-      inputSchema: z.object({
-        region: z
-          .string()
-          .optional()
-          .describe(
-            "Region name to list subregions for (e.g. 'Europe', 'Asia'). Omit to return all subregions across every region. Use 'geodb_regions' for valid names.",
-          ),
-      }),
-      annotations: READ_ONLY,
-    },
-    async ({ region }) => {
-      const params: Params = {};
-      if (region !== undefined) params["region"] = region;
-      const data = await callApi(ENDPOINTS.GEO_SUBREGIONS, apiKey, params);
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(data) }],
-      };
-    },
-  );
-
-  server.registerTool(
-    "geodb_countries",
-    {
-      title: "GeoDB Countries",
-      description:
-        "List 250 countries and territories. " +
-        "Returns a 'countries' array; each item has name, iso_alpha_2, iso_alpha_3, iso_numeric, capital, region, and subregion. " +
-        "Optionally filter by region or subregion name. " +
-        "capital, region, and subregion are empty strings (not omitted) for a handful of uninhabited or dependent territories " +
-        "with no assigned value — e.g. Bouvet Island and Heard Island and McDonald Islands have no region/subregion, " +
-        "and Antarctica/Tokelau/US Minor Outlying Islands have no capital. " +
-        "Invalid region or subregion names return 400. " +
-        "Use 'geodb_regions' / 'geodb_subregions' for valid filter names, and 'geodb_country_details' for one country's full metadata.",
-      inputSchema: z.object({
-        region: z
-          .string()
-          .optional()
-          .describe(
-            "Optional filter to return countries within a specific region (e.g. 'Europe', 'Asia'). Use 'geodb_regions' for valid names.",
-          ),
-        subregion: z
-          .string()
-          .optional()
-          .describe(
-            "Optional filter to return countries within a specific subregion (e.g. 'Northern Europe', 'Southern Asia'). Use 'geodb_subregions' for valid names.",
-          ),
-      }),
-      annotations: READ_ONLY,
-    },
-    async ({ region, subregion }) => {
-      const params: Params = {};
-      if (region !== undefined) params["region"] = region;
-      if (subregion !== undefined) params["subregion"] = subregion;
-      const data = await callApi(ENDPOINTS.GEO_COUNTRIES, apiKey, params);
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(data) }],
-      };
-    },
-  );
-
-  server.registerTool(
-    "geodb_country_details",
-    {
-      title: "GeoDB Country Details",
-      description:
-        "Get metadata for one country by ISO 3166-1 alpha-2 code. " +
-        "Returns name, iso_alpha_2, iso_alpha_3, iso_numeric, phone_code, capital, top_level_domain, native_name, " +
-        "region, subregion, nationality, flag_emoji, currency_code, currency_name, and currency_symbol. " +
-        "capital, region, and subregion are empty strings for the same uninhabited/dependent territories as 'geodb_countries'; " +
-        "every other field, including currency and phone code, is populated for those territories. " +
-        "Use 'geodb_countries' if you need to resolve a name to an alpha-2 code first. " +
-        "Invalid or missing country codes return 400.",
-      inputSchema: z.object({
-        country: z.string().describe(ISO2_DESC),
-      }),
-      annotations: READ_ONLY,
-    },
-    async ({ country }) => {
-      const data = await callApi(ENDPOINTS.GEO_COUNTRY_DETAILS, apiKey, {
-        country,
-      });
-      return {
-        content: [{ type: "text" as const, text: JSON.stringify(data) }],
-      };
-    },
-  );
-
-  server.registerTool(
     "geodb_admin_levels",
     {
       title: "GeoDB Admin Levels",
@@ -213,6 +98,73 @@ export function register(server: McpServer, apiKey: string): void {
   );
 
   server.registerTool(
+    "geodb_countries",
+    {
+      title: "GeoDB Countries",
+      description:
+        "List 250 countries and territories. " +
+        "Returns a 'countries' array; each item has name, iso_alpha_2, iso_alpha_3, iso_numeric, capital, region, and subregion. " +
+        "Optionally filter by region or subregion name. " +
+        "capital, region, and subregion are empty strings (not omitted) for a handful of uninhabited or dependent territories " +
+        "with no assigned value — e.g. Bouvet Island and Heard Island and McDonald Islands have no region/subregion, " +
+        "and Antarctica/Tokelau/US Minor Outlying Islands have no capital. " +
+        "Invalid region or subregion names return 400. " +
+        "Use 'geodb_regions' / 'geodb_subregions' for valid filter names, and 'geodb_country_details' for one country's full metadata.",
+      inputSchema: z.object({
+        region: z
+          .string()
+          .optional()
+          .describe(
+            "Optional filter to return countries within a specific region (e.g. 'Europe', 'Asia'). Use 'geodb_regions' for valid names.",
+          ),
+        subregion: z
+          .string()
+          .optional()
+          .describe(
+            "Optional filter to return countries within a specific subregion (e.g. 'Northern Europe', 'Southern Asia'). Use 'geodb_subregions' for valid names.",
+          ),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ region, subregion }) => {
+      const params: Params = {};
+      if (region !== undefined) params["region"] = region;
+      if (subregion !== undefined) params["subregion"] = subregion;
+      const data = await callApi(ENDPOINTS.GEO_COUNTRIES, apiKey, params);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "geodb_country_details",
+    {
+      title: "GeoDB Country Details",
+      description:
+        "Get metadata for one country by ISO 3166-1 alpha-2 code. " +
+        "Returns name, iso_alpha_2, iso_alpha_3, iso_numeric, phone_code, capital, top_level_domain, native_name, " +
+        "region, subregion, nationality, flag_emoji, currency_code, currency_name, and currency_symbol. " +
+        "capital, region, and subregion are empty strings for the same uninhabited/dependent territories as 'geodb_countries'; " +
+        "every other field, including currency and phone code, is populated for those territories. " +
+        "Use 'geodb_countries' if you need to resolve a name to an alpha-2 code first. " +
+        "Invalid or missing country codes return 400.",
+      inputSchema: z.object({
+        country: z.string().describe(ISO2_DESC),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ country }) => {
+      const data = await callApi(ENDPOINTS.GEO_COUNTRY_DETAILS, apiKey, {
+        country,
+      });
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
     "geodb_cities",
     {
       title: "GeoDB Cities",
@@ -241,6 +193,54 @@ export function register(server: McpServer, apiKey: string): void {
       const params: Params = { country };
       if (admin_unit !== undefined) params["admin_unit"] = admin_unit;
       const data = await callApi(ENDPOINTS.GEO_CITIES, apiKey, params);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "geodb_regions",
+    {
+      title: "GeoDB Regions",
+      description:
+        "List the geographical regions supported by GeoDB. " +
+        "Returns a 'regions' array of exactly 6 names: Africa, Americas, Asia, Europe, Oceania, and Polar. " +
+        "Use a returned name with 'geodb_subregions' to list subregions, or with 'geodb_countries' to filter countries.",
+      inputSchema: z.object({}),
+      annotations: READ_ONLY,
+    },
+    async () => {
+      const data = await callApi(ENDPOINTS.GEO_REGIONS, apiKey);
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "geodb_subregions",
+    {
+      title: "GeoDB Subregions",
+      description:
+        "List subregions within a geographical region, or all subregions across every region when 'region' is omitted. " +
+        "Returns a 'subregions' array of names such as Western Europe, Southern Asia, or Northern America. " +
+        "Use 'geodb_regions' for valid region names. An invalid region name returns 400; " +
+        "a region with no subregions (Polar) returns 404.",
+      inputSchema: z.object({
+        region: z
+          .string()
+          .optional()
+          .describe(
+            "Region name to list subregions for (e.g. 'Europe', 'Asia'). Omit to return all subregions across every region. Use 'geodb_regions' for valid names.",
+          ),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ region }) => {
+      const params: Params = {};
+      if (region !== undefined) params["region"] = region;
+      const data = await callApi(ENDPOINTS.GEO_SUBREGIONS, apiKey, params);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(data) }],
       };
