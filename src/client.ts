@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { Readable } from "node:stream";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { type Params, type Body } from "./constants.js";
 import { validateApiKey } from "./auth.js";
@@ -10,6 +11,7 @@ const http = axios.create({
   baseURL: APIFREAKS_BASE_URL,
   timeout: 60_000,
   headers: { Accept: "application/json" },
+  paramsSerializer: { indexes: null },
 });
 
 function formatError(status: number, data: unknown): string {
@@ -31,8 +33,8 @@ export async function callApi(
   endpoint: string,
   apiKey: string,
   params?: Params,
-  body?: Body,
-  method: "GET" | "POST" = "GET",
+  body?: Body | FormData | Buffer | Readable,
+  method: "GET" | "POST" | "DELETE" = "GET",
   extraHeaders?: Record<string, string>,
 ): Promise<Params> {
   if (!validateApiKey(apiKey)) {
@@ -44,26 +46,32 @@ export async function callApi(
   const queryParams = { ...params, apiKey };
   const headers = extraHeaders ? { ...extraHeaders } : undefined;
   try {
-    const response =
-      method === "POST"
-        ? await http.post(endpoint, body, { params: queryParams, headers })
-        : await http.get(endpoint, { params: queryParams, headers });
+    let response;
+    if (method === "POST") {
+      if (body instanceof FormData) {
+        response = await http.post(endpoint, body, {
+          params: queryParams,
+          headers,
+        });
+      } else if (Buffer.isBuffer(body) || body instanceof Readable) {
+        response = await http.post(endpoint, body, {
+          params: queryParams,
+          headers: { ...headers, "Content-Type": "application/octet-stream" },
+        });
+      } else {
+        response = await http.post(endpoint, body, {
+          params: queryParams,
+          headers: { ...headers, "Content-Type": "application/json" },
+        });
+      }
+    } else if (method === "DELETE") {
+      response = await http.delete(endpoint, { params: queryParams, headers });
+    } else {
+      response = await http.get(endpoint, { params: queryParams, headers });
+    }
     return response.data as Params;
   } catch (err) {
-    if (err instanceof AxiosError) {
-      if (!err.response) {
-        const msg =
-          err.code === "ECONNABORTED"
-            ? "APIFreaks API timed out. Please try again."
-            : `Cannot reach APIFreaks API (${err.code ?? "unknown error"}). Please try again later.`;
-        throw new McpError(ErrorCode.InternalError, msg);
-      }
-      throw new McpError(
-        ErrorCode.InternalError,
-        formatError(err.response.status, err.response.data),
-      );
-    }
-    throw err;
+    throw wrapAxiosError(err);
   }
 }
 
@@ -104,7 +112,10 @@ export async function callApiBinary(
       }
       throw new McpError(
         ErrorCode.InternalError,
-        formatError(err.response.status, decodeAxiosErrorData(err.response.data)),
+        formatError(
+          err.response.status,
+          decodeAxiosErrorData(err.response.data),
+        ),
       );
     }
     throw err;
@@ -127,4 +138,21 @@ function parseJsonText(text: string): unknown {
   } catch {
     return text;
   }
+}
+
+function wrapAxiosError(err: unknown): never {
+  if (err instanceof AxiosError) {
+    if (!err.response) {
+      const msg =
+        err.code === "ECONNABORTED"
+          ? "APIFreaks API timed out. Please try again."
+          : `Cannot reach APIFreaks API (${err.code ?? "unknown error"}). Please try again later.`;
+      throw new McpError(ErrorCode.InternalError, msg);
+    }
+    throw new McpError(
+      ErrorCode.InternalError,
+      formatError(err.response.status, err.response.data),
+    );
+  }
+  throw err;
 }

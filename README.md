@@ -7,7 +7,7 @@
 [![CI](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-16A34A)](https://github.com/api-freaks/apifreaks-mcp/blob/main/LICENSE)
 
-The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, web scrapes, VAT/IBAN/SWIFT, email and phone validation, geocoding, and more.
+The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, PDFs, web scrapes, VAT/IBAN/SWIFT, email and phone validation, geocoding, and more.
 
 **What can you ask once it's connected?**
 
@@ -67,7 +67,7 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 
 This server covers many APIs. Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
 
-Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then add the ones you need to `APIFREAKS_MODULES` and restart.
+Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then paste a full `APIFREAKS_MODULES=...` line (every module you want, not only the new name) and restart.
 
 ```bash
 APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather
@@ -87,6 +87,7 @@ Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both 
 | `ssl` | Live certificate and full chain |
 | `domain` | Availability checks, suggestions, bulk, subdomain lookup |
 | `screenshot` | Capture, scrolling capture, bulk |
+| `pdf` | Merge, split, compress, protect, generate, convert |
 | `currency` | Live/historical rates, converters, time series, symbols, limits |
 | `commodity` | Live/historical prices, fluctuation, time series, symbols |
 | `financial` | VAT rates, VAT numbers, IBAN, SWIFT/BIC |
@@ -447,6 +448,39 @@ Capture screenshots and scrolling recordings of any webpage.
 | `screenshot_capture` | Capture a screenshot of a webpage and return the image URL |
 | `screenshot_bulk_capture` | Capture screenshots of up to 50 webpages in one request |
 | `screenshot_capture_scrolling` | Record a scrolling video or animated GIF of a webpage |
+
+---
+
+### PDF (`pdf`) — 20 tools
+
+Merge, split, extract or remove pages, convert to images, generate from templates, compress, rotate, encrypt/restrict, decrypt/unrestrict, and linearize.
+
+Jobs (merge, split, convert, …) are asynchronous: they return a `taskId`. Check progress with `pdf_task_status`. Local files need an **absolute** path (the MCP server reads the disk). You can also pass a stored `file_id`. Template generation (`pdf_generate`, `pdf_generate_bulk`) is synchronous and returns a hosted `pdf_url`.
+
+Completed jobs include download URLs. Add your API key as the `apiKey` query parameter or the `X-apiKey` header.
+
+| Tool | Description |
+|---|---|
+| `pdf_merge` | Merge PDFs (local paths and/or stored file IDs) |
+| `pdf_split` | Split a PDF by page ranges |
+| `pdf_extract_pages` | Extract pages into a new PDF or ZIP |
+| `pdf_remove_pages` | Remove pages from a PDF |
+| `pdf_to_image` | Convert pages to PNG, JPG, TIFF, BMP, or GIF |
+| `pdf_generate` | Render a template with JSON and get a hosted PDF URL |
+| `pdf_generate_bulk` | Render one PDF per CSV row |
+| `pdf_compress` | Reduce PDF file size |
+| `pdf_rotate` | Rotate pages |
+| `pdf_encrypt` | Password-protect a PDF |
+| `pdf_restrict` | Restrict printing, copying, and editing |
+| `pdf_decrypt` | Remove encryption |
+| `pdf_unrestrict` | Remove permission restrictions |
+| `pdf_linearize` | Linearize for Fast Web View |
+| `pdf_task_status` | Check one async job (`queued` / `processing` / `completed` / `failed`) |
+| `pdf_file_status` | Metadata for a stored file |
+| `pdf_files` | List stored PDFs |
+| `pdf_file_delete` | Delete a stored PDF |
+| `pdf_upload` | Upload local PDFs and get file IDs |
+| `pdf_upload_binary` | Upload one large PDF as raw bytes and get a file ID |
 
 ---
 

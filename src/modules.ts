@@ -18,6 +18,7 @@ import { register as registerFinancial } from "./tools/financial.js";
 import { register as registerGeocoding } from "./tools/geocoding.js";
 import { register as registerGeography } from "./tools/geodb.js";
 import { register as registerIpIntelligence } from "./tools/ip-intelligence.js";
+import { register as registerPdf } from "./tools/pdf.js";
 import { register as registerPhoneValidation } from "./tools/phone-validation.js";
 import { register as registerScraper } from "./tools/scraper.js";
 import { register as registerScreenshot } from "./tools/screenshot.js";
@@ -40,6 +41,7 @@ const MODULES: Record<ModuleName, (server: McpServer, apiKey: string) => void> =
     ssl: registerSsl,
     domain: registerDomain,
     screenshot: registerScreenshot,
+    pdf: registerPdf,
     currency: registerCurrency,
     commodity: registerCommodity,
     financial: registerFinancial,
@@ -99,14 +101,26 @@ function registerListModules(
   enabled: Array<ModuleName>,
   unknown: Array<string>,
 ): void {
+  const currentLine = enabled.length > 0 ? modulesEnvLine(enabled) : "";
+  const exampleLine = modulesEnvLine([
+    "ip-intelligence",
+    "whois",
+    "dns",
+    "weather",
+  ]);
+  const howToEnable =
+    `When a module is missing, give the user the full ${ENV.MODULES}=... line to paste ` +
+    `(keep every currently enabled module, then append the new ones). ` +
+    `Do not only name the module. They must restart the MCP server after changing it.`;
+
   const description =
     enabled.length === 0
       ? `No APIFreaks API tools are registered because ${ENV.MODULES} is not set. ` +
-        `Call this tool to see each module and the tools it contains, then ask the user to add the needed modules to ${ENV.MODULES} and restart. ` +
-        `Example: ${ENV.MODULES}=whois,ip-intelligence,geography,weather`
-      : `Enabled APIFreaks modules: ${enabled.join(", ")}. ` +
+        `Call this tool to see each module and its tools, then give the user a complete assignment to paste. ` +
+        `Example: ${exampleLine}`
+      : `Enabled APIFreaks modules: ${enabled.join(", ")} (${currentLine}). ` +
         `Call this tool to see tools in every module if something the user needs is not enabled. ` +
-        `To change the set, update ${ENV.MODULES} and restart.`;
+        howToEnable;
 
   server.registerTool(
     "list_modules",
@@ -129,8 +143,10 @@ function registerListModules(
               enabled,
               unknown,
               available: MODULE_NAMES,
+              current: currentLine,
+              example: exampleLine,
+              how_to_enable: howToEnable,
               modules: moduleCatalogPayload(enabled),
-              example: `${ENV.MODULES}=ip-intelligence,whois,dns,weather`,
             }),
           },
         ],
@@ -158,4 +174,8 @@ function moduleCatalogPayload(
     };
   }
   return catalog;
+}
+
+function modulesEnvLine(names: Array<string>): string {
+  return `${ENV.MODULES}=${names.join(",")}`;
 }

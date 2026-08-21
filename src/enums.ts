@@ -21,3 +21,19 @@ export const ScreenshotFileType = z.enum(["PNG", "JPG", "WebP", "PDF"]);
 export const ScrollingFileType = z.enum(["MP4", "WEBM", "GIF"]);
 export const ScrollSpeed = z.enum(["fast", "normal", "slow"]);
 export const WaitForEvent = z.enum(["load", "domcontentloaded", "networkidle"]);
+export const PdfCompressionLevel = z.enum([
+  "low",
+  "balanced",
+  "high",
+  "extreme",
+]);
+export const PdfImageFormat = z.enum(["png", "jpg", "tif", "bmp", "gif"]);
+export const PdfRotateAngle = z.union([
+  z.literal(0),
+  z.literal(90),
+  z.literal(180),
+  z.literal(270),
+  z.literal(-90),
+  z.literal(-180),
+  z.literal(-270),
+]);
