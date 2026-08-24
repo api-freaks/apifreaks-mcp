@@ -24,8 +24,8 @@
           "isSecret": true
         },
         {
-          "name": "APIFREAKS_MODULES",
-          "description": "Comma-separated modules to expose as tools (e.g. ip-intelligence,whois,dns,weather). If unset, only list_modules is advertised. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
+          "name": "ENABLE_MODULES",
+          "description": "Comma-separated modules to expose as tools (e.g. ip-intelligence,whois,dns,weather). If unset, only list_modules is advertised — call it to see every module and its tools. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
           "isRequired": true,
           "isSecret": false
         }
