@@ -8,7 +8,7 @@ async function main() {
 
   const server = new McpServer({
     name: "apifreaks-mcp-server",
-    version: "2.0.0",
+    version: "2.0.2",
   });
 
   registerEnabledModules(server, apiKey);
