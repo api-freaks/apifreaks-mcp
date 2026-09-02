@@ -1,6 +1,6 @@
 export const ENV = {
   API_KEY: "APIFREAKS_API_KEY",
-  MODULES: "APIFREAKS_MODULES",
+  MODULES: "ENABLE_MODULES",
 } as const;
 
 export function getApiKey(): string {

@@ -59,7 +59,7 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 | Variable | Required | Description |
 |---|---|---|
 | `APIFREAKS_API_KEY` | Yes | Your APIFreaks API key — get one at [apifreaks.com](https://apifreaks.com) |
-| `APIFREAKS_MODULES` | Yes | Comma-separated list of modules to expose. If unset or empty, only `list_modules` is listed (no API tools). See [Modules](#modules). |
+| `ENABLE_MODULES` | Yes | Comma-separated list of modules to expose. Without it the server starts with only `list_modules` and no API tools — call that tool to see every module and its tools. See [Modules](#modules). |
 
 ---
 
@@ -67,10 +67,10 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 
 This server covers many APIs. Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
 
-Set `APIFREAKS_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then paste a full `APIFREAKS_MODULES=...` line (every module you want, not only the new name) and restart.
+Set `ENABLE_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then paste a full `ENABLE_MODULES=...` line (every module you want, not only the new name) and restart.
 
 ```bash
-APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather
+ENABLE_MODULES=ip-intelligence,currency,whois,dns,weather
 ```
 
 Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both work). Unknown names are ignored and logged to stderr.
@@ -112,7 +112,7 @@ Full API documentation: [apifreaks.com/docs](https://apifreaks.com/docs)
 The fastest way to connect it — via the Claude Code CLI:
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e ENABLE_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 Replace `ip-intelligence,currency,whois,dns,weather` with the [modules](#modules) you need. For Cursor, Windsurf, Cline, and others see the [Integration Guides](#integration-guides) below.
@@ -126,7 +126,7 @@ Replace `ip-intelligence,currency,whois,dns,weather` with the [modules](#modules
 **Via terminal (recommended):**
 
 ```bash
-claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
+claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e ENABLE_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 **Via config file** (`~/.claude/settings.json`):
@@ -139,7 +139,7 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODU
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -151,7 +151,7 @@ claude mcp add apifreaks -e APIFREAKS_API_KEY=your_apikey_here -e APIFREAKS_MODU
 ### Codex CLI
 
 ```bash
-codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here --env APIFREAKS_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
+codex mcp add apifreaks --env APIFREAKS_API_KEY=your_apikey_here --env ENABLE_MODULES=ip-intelligence,currency,whois,dns,weather -- npx -y @apifreaks/mcp
 ```
 
 Start a new Codex session after adding the server.
@@ -173,7 +173,7 @@ Edit `claude_desktop_config.json`:
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -196,7 +196,7 @@ Create or edit `.cursor/mcp.json` in your project root (or `~/.cursor/mcp.json` 
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -219,7 +219,7 @@ Edit `~/.codeium/windsurf/mcp_config.json`:
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -244,7 +244,7 @@ Open the **MCP Servers** panel in Cline, click **Configure**, then **Advanced MC
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -268,7 +268,7 @@ Edit `~/.config/opencode/config.json`:
       "command": ["npx", "-y", "@apifreaks/mcp"],
       "environment": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -289,7 +289,7 @@ Edit `~/.gemini/settings.json` (or `.gemini/settings.json` in your project root 
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }
@@ -311,7 +311,7 @@ Create `.vscode/mcp.json` in your workspace:
       "args": ["-y", "@apifreaks/mcp"],
       "env": {
         "APIFREAKS_API_KEY": "your_apikey_here",
-        "APIFREAKS_MODULES": "ip-intelligence,currency,whois,dns,weather"
+        "ENABLE_MODULES": "ip-intelligence,currency,whois,dns,weather"
       }
     }
   }

@@ -3,7 +3,7 @@
   "name": "io.github.api-freaks/apifreaks-mcp",
   "title": "APIFreaks MCP",
   "description": "The official MCP server for APIFreaks, connecting your AI to the full range of APIFreaks APIs.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "websiteUrl": "https://apifreaks.com/integrations/mcp-server",
   "repository": {
     "url": "https://github.com/api-freaks/apifreaks-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "@apifreaks/mcp",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "runtimeHint": "npx",
       "transport": { "type": "stdio" },
       "environmentVariables": [
@@ -24,8 +24,8 @@
           "isSecret": true
         },
         {
-          "name": "APIFREAKS_MODULES",
-          "description": "Comma-separated modules to expose as tools (e.g. ip-intelligence,whois,dns,weather). If unset, only list_modules is advertised. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
+          "name": "ENABLE_MODULES",
+          "description": "Comma-separated modules to expose as tools (e.g. ip-intelligence,whois,dns,weather). If unset, only list_modules is advertised — call it to see every module and its tools. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
           "isRequired": true,
           "isSecret": false
         }
