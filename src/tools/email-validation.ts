@@ -54,16 +54,16 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Bulk Email Validation",
       description:
-        "Validate up to 100 email addresses in one request. Each address is checked independently, " +
+        "Validate up to 10 email addresses in one request. Each address is checked independently, " +
         "so one failure does not drop the rest of the batch. " +
         "The response is 'emailValidationResponses': the same per-email result as 'email_validate', " +
         "or a per-item error object when that address could not be processed.",
       inputSchema: z.object({
         emails: z
           .array(EmailEntry)
-          .max(100)
+          .max(10)
           .describe(
-            'List of email objects (max 100). Each object must include "email"; "name" and "ip" are optional. Example: [{"email":"user@example.com"},{"email":"admin@example.org","ip":"8.8.8.8"}]',
+            'List of email objects (max 10). Each object must include "email"; "name" and "ip" are optional. Example: [{"email":"user@example.com"},{"email":"admin@example.org","ip":"8.8.8.8"}]',
           ),
       }),
       annotations: READ_ONLY,

@@ -3,7 +3,7 @@
   "name": "io.github.api-freaks/apifreaks-mcp",
   "title": "APIFreaks MCP",
   "description": "The official MCP server for APIFreaks, connecting your AI to the full range of APIFreaks APIs.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "websiteUrl": "https://apifreaks.com/integrations/mcp-server",
   "repository": {
     "url": "https://github.com/api-freaks/apifreaks-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "@apifreaks/mcp",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "runtimeHint": "npx",
       "transport": { "type": "stdio" },
       "environmentVariables": [
