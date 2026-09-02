@@ -400,7 +400,7 @@ Deliverability, syntax, domain, and optional IP enrichment.
 | Tool | Description |
 |---|---|
 | `email_validate` | Validate a single email address |
-| `email_bulk_validate` | Validate up to 100 email addresses in one request |
+| `email_bulk_validate` | Validate up to 10 email addresses in one request |
 
 ---
 
