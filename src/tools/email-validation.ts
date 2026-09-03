@@ -25,9 +25,11 @@ export function register(server: McpServer, apiKey: string): void {
       description:
         "Validate one email address: syntax, domain DNS, disposable/spam/free/catch-all flags, " +
         "and whether it looks deliverable. " +
-        "Read 'validEmail' for the overall result: 'valid', 'invalid', 'INVALID_EMAIL', 'unknown', or 'risky'. " +
-        "A syntax error comes back as INVALID_EMAIL (uppercase); an undeliverable address comes back as 'invalid' (lowercase). " +
-        "'unknown' and 'risky' are documented by the API but were not observed in testing. " +
+        "Read 'validEmail' for the overall result: 'valid' (deliverable), 'invalid' (rejected or undeliverable), " +
+        "'unknown' (inconclusive), 'risky' (uncertain, often catch-all), or 'app_server_blocked' " +
+        "(the recipient mail server blocked verification). " +
+        "When 'validSyntax' is false, 'validEmail' is 'invalid'. When the result is not 'valid', 'reason' explains why. " +
+        "DNS hostnames are in 'dns.mxRecord' and 'dns.aRecord'. " +
         "Optional: pass 'ip' to attach geolocation and threat signals for that IP.",
       inputSchema: EmailEntry,
       annotations: READ_ONLY,
@@ -56,8 +58,7 @@ export function register(server: McpServer, apiKey: string): void {
       description:
         "Validate up to 10 email addresses in one request. Each address is checked independently, " +
         "so one failure does not drop the rest of the batch. " +
-        "The response is 'emailValidationResponses': the same per-email result as 'email_validate', " +
-        "or a per-item error object when that address could not be processed.",
+        "The response is 'emailResponse': an array of the same per-email result as 'email_validate'.",
       inputSchema: z.object({
         emails: z
           .array(EmailEntry)
