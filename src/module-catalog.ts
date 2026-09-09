@@ -74,12 +74,23 @@ export const MODULE_CATALOG = {
     ],
   },
   domain: {
-    summary: "Availability checks, suggestions, bulk, subdomain lookup",
+    summary:
+      "Availability, suggestions, bulk, subdomain, reputation, typosquatting",
     tools: [
       { name: "domain_check_availability", summary: "Check if a domain is available" },
       { name: "domain_check_availability_with_suggestions", summary: "Availability plus name suggestions" },
       { name: "domain_bulk_check_availability", summary: "Availability for many domains" },
       { name: "domain_subdomain_lookup", summary: "Discovered subdomains for a domain" },
+      {
+        name: "domain_reputation_lookup",
+        summary:
+          "Risk verdict, trust score, DGA, threat feeds, email deliverability for a domain",
+      },
+      {
+        name: "domain_typosquatting_lookup",
+        summary:
+          "Registered typo/look-alike domains for a brand keyword or wildcard pattern",
+      },
     ],
   },
   screenshot: {

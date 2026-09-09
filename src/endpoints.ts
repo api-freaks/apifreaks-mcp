@@ -47,6 +47,8 @@ export const ENDPOINTS = {
   DOMAIN_AVAILABILITY: "/v1.0/domain/availability",
   DOMAIN_AVAILABILITY_SUGGESTIONS: "/v1.0/domain/availability/suggestions",
   DOMAIN_SUBDOMAIN_LOOKUP: "/v1.0/subdomains/lookup",
+  DOMAIN_REPUTATION: "/v1.0/domain/reputation",
+  DOMAIN_TYPOSQUATTING: "/v1.0/domain/typosquatting",
 
   // Currency
   CURRENCY_RATES_LATEST: "/v1.0/currency/rates/latest",

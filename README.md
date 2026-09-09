@@ -18,6 +18,8 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 | 🌍 | *"Who registered openai.com and when? Has the WHOIS record changed recently?"* |
 | 💱 | *"Convert 2500 USD to EUR, GBP, and JPY at today's live rate."* |
 | 🔍 | *"Check if these 20 domain names are available for registration."* |
+| 🛡 | *"Is paypal-login.xyz risky? What's its domain reputation and trust score?"* |
+| 🕵 | *"Find typosquat domains for the brand paypal."* |
 | 📡 | *"What DNS records does github.com have? Show me the full MX and TXT records."* |
 
 ---
@@ -85,7 +87,7 @@ Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both 
 | `email-validation` | Single and bulk email validation |
 | `phone-validation` | Single and bulk phone validation |
 | `ssl` | Live certificate and full chain |
-| `domain` | Availability checks, suggestions, bulk, subdomain lookup |
+| `domain` | Availability, suggestions, bulk, subdomain, reputation, typosquatting |
 | `screenshot` | Capture, scrolling capture, bulk |
 | `pdf` | Merge, split, compress, protect, generate, convert |
 | `currency` | Live/historical rates, converters, time series, symbols, limits |
@@ -426,9 +428,9 @@ Live SSL certificate data for any domain.
 
 ---
 
-### Domain (`domain`) — 4 tools
+### Domain (`domain`) — 6 tools
 
-Domain availability checks with bulk support, suggestions, and subdomain discovery.
+Domain availability checks with bulk support, suggestions, subdomain discovery, reputation assessment, and typosquatting search.
 
 | Tool | Description |
 |---|---|
@@ -436,6 +438,8 @@ Domain availability checks with bulk support, suggestions, and subdomain discove
 | `domain_check_availability_with_suggestions` | Check availability and get alternative domain suggestions |
 | `domain_subdomain_lookup` | Paginated list of discovered subdomains for a domain |
 | `domain_bulk_check_availability` | Check availability for up to 100 domains at once |
+| `domain_reputation_lookup` | Risk verdict, trust score, DGA, threat feeds, and email deliverability for a domain |
+| `domain_typosquatting_lookup` | Find registered typo/look-alike domains for a brand keyword or wildcard pattern |
 
 ---
 
