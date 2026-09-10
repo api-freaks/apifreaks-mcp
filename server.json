@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.api-freaks/apifreaks-mcp",
   "title": "APIFreaks MCP",
-  "description": "Live APIFreaks APIs for agents: weather, WHOIS, DNS, SSL, domains, IP intel, screenshots, PDF, currency, commodities, VAT/IBAN/SWIFT, email/phone, geocoding, geography, timezone, zipcode, scraping, user-agent. Opt-in via ENABLE_MODULES. Call list_modules for needs_enable[] and a paste-ready enable_line — then restart.",
+  "description": "APIFreaks MCP: live APIs for agents. Enable modules with ENABLE_MODULES; discover via list_modules.",
   "version": "2.1.0",
   "websiteUrl": "https://apifreaks.com/integrations/mcp-server",
   "repository": {
