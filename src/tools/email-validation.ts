@@ -25,11 +25,15 @@ export function register(server: McpServer, apiKey: string): void {
       description:
         "Validate one email address: syntax, domain DNS, disposable/spam/free/catch-all flags, " +
         "and whether it looks deliverable. " +
-        "Read 'validEmail' for the overall result: 'valid' (deliverable), 'invalid' (rejected or undeliverable), " +
-        "'unknown' (inconclusive), 'risky' (uncertain, often catch-all), or 'app_server_blocked' " +
-        "(the recipient mail server blocked verification). " +
-        "When 'validSyntax' is false, 'validEmail' is 'invalid'. When the result is not 'valid', 'reason' explains why. " +
-        "DNS hostnames are in 'dns.mxRecord' and 'dns.aRecord'. " +
+        "Read 'validEmail': 'valid' (deliverable; 'reason' omitted), " +
+        "'accept_all' (catch-all domain accepted the recipient; mailbox unconfirmed — pairs with domain.catchAll=true), " +
+        "'invalid' (rejected, or domain accepts no mail), 'INVALID_EMAIL' (syntax failure; treat as invalid), " +
+        "'unknown' (inconclusive; common for no-MX domains probed via A record), " +
+        "'risky' (mailbox full or greylisted), or 'app_server_blocked' (verifier IP blocked). " +
+        "When not 'valid', 'reason' explains why. " +
+        "'dns' may be absent. 'dns.mxRecord' lists every host at the lowest MX preference " +
+        "(absent when there is no MX; ['.'] means null MX / accepts no mail). " +
+        "'dns.aRecord' is present when there is no MX but an address record exists. " +
         "Optional: pass 'ip' to attach geolocation and threat signals for that IP.",
       inputSchema: EmailEntry,
       annotations: READ_ONLY,
