@@ -52,22 +52,14 @@ const MODULES: Record<ModuleName, (server: McpServer, apiKey: string) => void> =
     "user-agent": registerUserAgent,
   };
 
-export function registerEnabledModules(
-  server: McpServer,
-  apiKey: string,
-): void {
-  const { enabled, unknown } = parseEnabledModules();
-  registerListModules(server, enabled, unknown);
+const TOPICS = MODULE_NAMES.join(", ");
 
-  for (const name of enabled) {
-    MODULES[name](server, apiKey);
-  }
-}
-
-function parseEnabledModules(): {
+export type ModulesState = {
   enabled: Array<ModuleName>;
   unknown: Array<string>;
-} {
+};
+
+export function parseEnabledModules(): ModulesState {
   const raw = getModulesEnv();
   if (!raw?.trim()) {
     return { enabled: [], unknown: [] };
@@ -96,84 +88,115 @@ function parseEnabledModules(): {
   return { enabled, unknown };
 }
 
+/** Short routing hint at MCP initialize (when the client supports it). */
+export function buildServerInstructions(enabled: Array<ModuleName>): string {
+  if (enabled.length === 0) {
+    return (
+      `APIFreaks MCP — modules: ${TOPICS}. ` +
+      `${ENV.MODULES} (env) is unset, so only list_modules is registered. ` +
+      `Call it for a paste-ready ${ENV.MODULES}=... line, then ask the user to set that env and restart to enable modules.`
+    );
+  }
+
+  return (
+    `APIFreaks MCP — modules: ${TOPICS}. ` +
+    `Enabled via ${ENV.MODULES}: ${enabled.join(", ")}. ` +
+    `If a needed module is missing, call list_modules and share its enable_line so the user can update ${ENV.MODULES} and restart.`
+  );
+}
+
+export function registerEnabledModules(
+  server: McpServer,
+  apiKey: string,
+  state: ModulesState = parseEnabledModules(),
+): void {
+  const { enabled, unknown } = state;
+
+  if (unknown.length > 0) {
+    console.error(
+      `APIFreaks MCP: ignoring unknown ${ENV.MODULES} name(s): ${unknown.join(", ")}. ` +
+        `Known: ${MODULE_NAMES.join(", ")}.`,
+    );
+  }
+
+  registerListModules(server, enabled, unknown);
+
+  for (const name of enabled) {
+    MODULES[name](server, apiKey);
+  }
+}
+
 function registerListModules(
   server: McpServer,
   enabled: Array<ModuleName>,
   unknown: Array<string>,
 ): void {
+  const enabledSet = new Set<ModuleName>(enabled);
   const currentLine = enabled.length > 0 ? modulesEnvLine(enabled) : "";
   const exampleLine = modulesEnvLine([
     "ip-intelligence",
     "whois",
     "dns",
+    "domain",
     "weather",
   ]);
-  const howToEnable =
-    `When a module is missing, give the user the full ${ENV.MODULES}=... line to paste ` +
-    `(keep every currently enabled module, then append the new ones). ` +
-    `Do not only name the module. They must restart the MCP server after changing it.`;
 
   const description =
-    enabled.length === 0
-      ? `No APIFreaks API tools are registered because ${ENV.MODULES} is not set. ` +
-        `Call this tool to see each module and its tools, then give the user a complete assignment to paste. ` +
-        `Example: ${exampleLine}`
-      : `Enabled APIFreaks modules: ${enabled.join(", ")} (${currentLine}). ` +
-        `Call this tool to see tools in every module if something the user needs is not enabled. ` +
-        howToEnable;
+    `APIFreaks module catalog (opt-in via ${ENV.MODULES}). ` +
+    `Call when a needed capability is missing from your tool list, or to check whether APIFreaks covers a topic. ` +
+    `Live tools for enabled modules already appear in tools/list; this returns needs_enable[] with paste-ready enable_line values — give the user that ${ENV.MODULES}=... line and ask them to restart. ` +
+    `Modules: ${TOPICS}.` +
+    (enabled.length === 0
+      ? ` ${ENV.MODULES} unset — only this tool is registered (example: ${exampleLine}).`
+      : ` Currently enabled: ${enabled.join(", ")}.`);
 
   server.registerTool(
     "list_modules",
     {
-      title:
-        enabled.length === 0
-          ? `Set ${ENV.MODULES} to enable tools`
-          : "List APIFreaks modules",
+      title: "Discover APIFreaks modules",
       description,
       inputSchema: z.object({}),
       annotations: READ_ONLY,
     },
     async function () {
+      const needs_enable: Array<{
+        module: ModuleName;
+        summary: string;
+        tools: Array<ModuleTool>;
+        enable_line: string;
+      }> = [];
+
+      for (const name of MODULE_NAMES) {
+        if (enabledSet.has(name)) {
+          continue;
+        }
+        needs_enable.push({
+          module: name,
+          summary: MODULE_CATALOG[name].summary,
+          tools: MODULE_CATALOG[name].tools,
+          enable_line: modulesEnvLine([...enabled, name]),
+        });
+      }
+
       return {
         content: [
           {
             type: "text" as const,
             text: JSON.stringify({
+              agent_hint:
+                "Live tools are in tools/list. For anything missing, give the user needs_enable[].enable_line and ask them to restart.",
               env: ENV.MODULES,
               enabled,
               unknown,
-              available: MODULE_NAMES,
-              current: currentLine,
+              current: currentLine || null,
               example: exampleLine,
-              how_to_enable: howToEnable,
-              modules: moduleCatalogPayload(enabled),
+              needs_enable,
             }),
           },
         ],
       };
     },
   );
-}
-
-function moduleCatalogPayload(
-  enabled: Array<ModuleName>,
-): Record<
-  ModuleName,
-  { enabled: boolean; summary: string; tools: Array<ModuleTool> }
-> {
-  const enabledSet = new Set<ModuleName>(enabled);
-  const catalog = {} as Record<
-    ModuleName,
-    { enabled: boolean; summary: string; tools: Array<ModuleTool> }
-  >;
-  for (const name of MODULE_NAMES) {
-    catalog[name] = {
-      enabled: enabledSet.has(name),
-      summary: MODULE_CATALOG[name].summary,
-      tools: MODULE_CATALOG[name].tools,
-    };
-  }
-  return catalog;
 }
 
 function modulesEnvLine(names: Array<string>): string {

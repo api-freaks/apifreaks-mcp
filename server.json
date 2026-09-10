@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.api-freaks/apifreaks-mcp",
   "title": "APIFreaks MCP",
-  "description": "The official MCP server for APIFreaks, connecting your AI to the full range of APIFreaks APIs.",
-  "version": "2.0.2",
+  "description": "Live APIFreaks APIs for agents: weather, WHOIS, DNS, SSL, domains, IP intel, screenshots, PDF, currency, commodities, VAT/IBAN/SWIFT, email/phone, geocoding, geography, timezone, zipcode, scraping, user-agent. Opt-in via ENABLE_MODULES. Call list_modules for needs_enable[] and a paste-ready enable_line — then restart.",
+  "version": "2.1.0",
   "websiteUrl": "https://apifreaks.com/integrations/mcp-server",
   "repository": {
     "url": "https://github.com/api-freaks/apifreaks-mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "@apifreaks/mcp",
-      "version": "2.0.2",
+      "version": "2.1.0",
       "runtimeHint": "npx",
       "transport": { "type": "stdio" },
       "environmentVariables": [
@@ -25,7 +25,7 @@
         },
         {
           "name": "ENABLE_MODULES",
-          "description": "Comma-separated modules to expose as tools (e.g. ip-intelligence,whois,dns,weather). If unset, only list_modules is advertised — call it to see every module and its tools. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
+          "description": "Comma-separated modules to register (e.g. ip-intelligence,whois,dns,domain,weather). If unset, only list_modules is available — call it for needs_enable[] and a paste-ready ENABLE_MODULES=... line, then restart. Available: ip-intelligence, geocoding, whois, dns, scraper, email-validation, phone-validation, ssl, domain, screenshot, pdf, currency, commodity, financial, zipcode, weather, geography, timezone, user-agent",
           "isRequired": true,
           "isSecret": false
         }

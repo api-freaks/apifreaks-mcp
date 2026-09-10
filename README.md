@@ -7,7 +7,7 @@
 [![CI](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/api-freaks/apifreaks-mcp/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-16A34A)](https://github.com/api-freaks/apifreaks-mcp/blob/main/LICENSE)
 
-The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can instantly query live weather, domains, IPs, DNS records, SSL certs, currency rates, commodity prices, screenshots, PDFs, web scrapes, VAT/IBAN/SWIFT, email and phone validation, geocoding, and more.
+The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [APIFreaks](https://apifreaks.com). Add it to Claude, Cursor, Windsurf, or any MCP-compatible client and your AI can query live weather, WHOIS, DNS, SSL, domain availability / reputation / typosquatting, IP geolocation and threat intel, currency, commodities, screenshots, PDFs, VAT/IBAN/SWIFT, email and phone validation, geocoding, and more.
 
 **What can you ask once it's connected?**
 
@@ -18,6 +18,8 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 | 🌍 | *"Who registered openai.com and when? Has the WHOIS record changed recently?"* |
 | 💱 | *"Convert 2500 USD to EUR, GBP, and JPY at today's live rate."* |
 | 🔍 | *"Check if these 20 domain names are available for registration."* |
+| 🛡 | *"Is paypal-login.xyz risky? What's its domain reputation and trust score?"* |
+| 🕵 | *"Find typosquat domains for the brand paypal."* |
 | 📡 | *"What DNS records does github.com have? Show me the full MX and TXT records."* |
 
 ---
@@ -59,18 +61,18 @@ The official [Model Context Protocol (MCP)](https://modelcontextprotocol.io) ser
 | Variable | Required | Description |
 |---|---|---|
 | `APIFREAKS_API_KEY` | Yes | Your APIFreaks API key — get one at [apifreaks.com](https://apifreaks.com) |
-| `ENABLE_MODULES` | Yes | Comma-separated list of modules to expose. Without it the server starts with only `list_modules` and no API tools — call that tool to see every module and its tools. See [Modules](#modules). |
+| `ENABLE_MODULES` | Yes | Comma-separated modules to expose. Without it only `list_modules` is available — call it to see modules/tools and how to enable more. See [Modules](#modules). |
 
 ---
 
 ## Modules
 
-This server covers many APIs. Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you actually need.
+This server covers many APIs. Advertising all of them in `tools/list` would fill the client's context window, so you opt in to the modules you need.
 
-Set `ENABLE_MODULES` in your MCP client config. Only those modules are registered, so `tools/list` returns just that subset. If the variable is missing or empty, no API tools are listed — only `list_modules`. Call it to see each module and the tools inside it, then paste a full `ENABLE_MODULES=...` line (every module you want, not only the new name) and restart.
+Set `ENABLE_MODULES` in your MCP client config. Only those modules are registered. If it is missing or empty, only `list_modules` is available — call it to see every module and a paste-ready `ENABLE_MODULES=...` line (keep existing modules, append new ones), then restart.
 
 ```bash
-ENABLE_MODULES=ip-intelligence,currency,whois,dns,weather
+ENABLE_MODULES=ip-intelligence,whois,dns,domain,weather
 ```
 
 Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both work). Unknown names are ignored and logged to stderr.
@@ -85,7 +87,7 @@ Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both 
 | `email-validation` | Single and bulk email validation |
 | `phone-validation` | Single and bulk phone validation |
 | `ssl` | Live certificate and full chain |
-| `domain` | Availability checks, suggestions, bulk, subdomain lookup |
+| `domain` | Availability, suggestions, bulk, subdomain, reputation, typosquatting |
 | `screenshot` | Capture, scrolling capture, bulk |
 | `pdf` | Merge, split, compress, protect, generate, convert |
 | `currency` | Live/historical rates, converters, time series, symbols, limits |
@@ -330,6 +332,12 @@ Click **Connect** on the Glama listing page and follow the prompts — it will g
 
 ## Available Tools
 
+### `list_modules` (always available)
+
+Module catalog for opt-in `ENABLE_MODULES`. Call when a capability is missing from the tool list or to check coverage. Live tools already appear in `tools/list`; use `needs_enable[].enable_line` for a paste-ready config line, then restart.
+
+---
+
 ### IP Intelligence (`ip-intelligence`) — 4 tools
 
 Geolocation, ISP, network, and threat data for any IP address.
@@ -426,9 +434,9 @@ Live SSL certificate data for any domain.
 
 ---
 
-### Domain (`domain`) — 4 tools
+### Domain (`domain`) — 6 tools
 
-Domain availability checks with bulk support, suggestions, and subdomain discovery.
+Domain availability checks with bulk support, suggestions, subdomain discovery, reputation assessment, and typosquatting search.
 
 | Tool | Description |
 |---|---|
@@ -436,6 +444,8 @@ Domain availability checks with bulk support, suggestions, and subdomain discove
 | `domain_check_availability_with_suggestions` | Check availability and get alternative domain suggestions |
 | `domain_subdomain_lookup` | Paginated list of discovered subdomains for a domain |
 | `domain_bulk_check_availability` | Check availability for up to 100 domains at once |
+| `domain_reputation_lookup` | Risk verdict, trust score, DGA, threat feeds, and email deliverability for a domain |
+| `domain_typosquatting_lookup` | Find registered typo/look-alike domains for a brand keyword or wildcard pattern |
 
 ---
 

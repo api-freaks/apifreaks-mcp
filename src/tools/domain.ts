@@ -163,4 +163,108 @@ export function register(server: McpServer, apiKey: string): void {
       };
     },
   );
+
+  server.registerTool(
+    "domain_reputation_lookup",
+    {
+      title: "Domain Reputation Lookup",
+      description:
+        "Security assessment for a domain you do not control: risk verdict, trust score with evidence, " +
+        "DGA (algorithmically generated name) detection, threat-feed matches, and email deliverability " +
+        "(SPF/DKIM/DMARC/MX plus fix recommendations). " +
+        "Use when deciding whether to trust a signup domain, triage a phishing report, vet a sender domain before accepting mail, " +
+        "or enrich an indicator — not for WHOIS registration facts (use whois_domain_lookup) or finding brand look-alikes (use domain_typosquatting_lookup). " +
+        "Start with 'risk_category.verdict' (e.g. safe/suspicious), 'confidence', and 'severity'; use 'trust_signals.trust_score' when you need a numeric threshold. " +
+        "'dga_score' flags botnet-style generated names even before feeds catch them. " +
+        "'email_deliverability' covers can-receive-email, grade, and 'issues' with recommendations. " +
+        "'intelligence' includes related IPs, STIX pattern, and 'recommended_action'. " +
+        "If a signal fails (e.g. WHOIS timeout), dependent fields may be null and the gap appears in 'errors'; other signals still return.",
+      inputSchema: z.object({
+        domain_name: z
+          .string()
+          .describe(
+            "Domain name to assess (e.g. 'example.com'). Must contain at least one dot and be at most 253 characters.",
+          ),
+      }),
+      annotations: READ_ONLY,
+    },
+    async ({ domain_name }) => {
+      const data = await callApi(ENDPOINTS.DOMAIN_REPUTATION, apiKey, {
+        domainName: domain_name,
+      });
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
+
+  server.registerTool(
+    "domain_typosquatting_lookup",
+    {
+      title: "Domain Typosquatting Lookup",
+      description:
+        "Find registered domains that look like typos or look-alikes of a brand — misspellings, character swaps, " +
+        "or wildcard patterns such as '*paypal*' — across 1,529+ TLDs. " +
+        "Use for brand/trademark sweeps, phishing look-alike discovery, or reclaiming dropped squat names. " +
+        "Not for checking whether one specific domain is free (use domain_check_availability) or scoring risk on a known domain " +
+        "(use domain_reputation_lookup). Matching is spelling/pattern proximity, not intent — treat results as a shortlist to triage. " +
+        "Pass 'keyword' for a single-label fuzzy search, or 'pattern' with up to three '*' wildcards for prefix/suffix/compound coverage; never both. " +
+        "Response is paginated (100 per page): 'domains' with domainName, createDate/expiryDate when available, lastSeen, and isDropped; " +
+        "use 'nextPageToken' as 'page_token' with the same keyword/pattern for further pages. Prefer lastSeen and isDropped when dates are missing.",
+      inputSchema: z
+        .object({
+          keyword: z
+            .string()
+            .min(3)
+            .max(63)
+            .optional()
+            .describe(
+              "Brand or label to find typo variants for. 3-63 characters, letters/digits/hyphens, a single label with no dots. " +
+                "Tightest/cheapest starting search. Use either keyword or pattern, never both.",
+            ),
+          pattern: z
+            .string()
+            .min(3)
+            .max(63)
+            .optional()
+            .describe(
+              "Wider wildcard search with '*' (max 3 asterisks; each matches zero or more characters). " +
+                "3-63 characters total; at least 5 non-wildcard characters required. " +
+                "Use for compound variants like '*paypal*' or 'login-*brand*'. Slower and larger than keyword. " +
+                "Use either keyword or pattern, never both.",
+            ),
+          page_token: z
+            .string()
+            .optional()
+            .describe(
+              "Opaque token from nextPageToken in the previous response. Required to retrieve page 2 and onward. " +
+                "Always pass the original keyword or pattern alongside the token.",
+            ),
+        })
+        .refine(
+          (v) =>
+            (v.keyword !== undefined && v.pattern === undefined) ||
+            (v.pattern !== undefined && v.keyword === undefined),
+          {
+            message:
+              'Provide either "keyword" or "pattern", never both or neither.',
+          },
+        ),
+      annotations: READ_ONLY,
+    },
+    async ({ keyword, pattern, page_token }) => {
+      const params: Params = {};
+      if (keyword !== undefined) params["keyword"] = keyword;
+      if (pattern !== undefined) params["pattern"] = pattern;
+      if (page_token !== undefined) params["pageToken"] = page_token;
+      const data = await callApi(
+        ENDPOINTS.DOMAIN_TYPOSQUATTING,
+        apiKey,
+        params,
+      );
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
+    },
+  );
 }
