@@ -334,7 +334,7 @@ Click **Connect** on the Glama listing page and follow the prompts — it will g
 
 ### `list_modules` (always available)
 
-Lists every module and tool, what's enabled, and an `enable_line` to paste when something is missing. Call this when you're unsure whether APIFreaks covers a request.
+Module catalog for opt-in `ENABLE_MODULES`. Call when a capability is missing from the tool list or to check coverage. Live tools already appear in `tools/list`; use `needs_enable[].enable_line` for a paste-ready config line, then restart.
 
 ---
 
