@@ -91,7 +91,7 @@ Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both 
 | `screenshot` | Capture, scrolling capture, bulk |
 | `pdf` | Merge, split, compress, protect, generate, convert |
 | `currency` | Live/historical rates, converters, time series, symbols, limits |
-| `commodity` | Live/historical prices, fluctuation, time series, symbols |
+| `commodity` | Live/historical prices (245+), fluctuation, time series, symbols |
 | `financial` | VAT rates, VAT numbers, IBAN, SWIFT/BIC |
 | `zipcode` | Lookup, radius, distance, city/region |
 | `weather` | Current, forecast, historical, air quality, marine, flood, astronomy |
@@ -517,16 +517,16 @@ Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurre
 
 ### Commodity (`commodity`) — 7 tools
 
-Real-time and historical prices for commodities like gold, oil, and agricultural products.
+Real-time and historical prices for 245+ commodities across metals, energy, agriculture, and more. If some symbols cannot be resolved, the API returns a partial result with an `unresolved` map instead of failing the whole request.
 
 | Tool | Description |
 |---|---|
-| `commodity_latest_rates` | Real-time prices for one or more commodities |
-| `commodity_historical_rates` | Historical OHLC prices for commodities on a specific date |
-| `commodity_fluctuation` | Price fluctuation metrics over a date range |
-| `commodity_time_series` | Daily OHLC prices over a date range (up to 365 days) |
-| `commodity_symbols` | List all supported commodity symbols with metadata |
-| `commodity_symbol_info` | Validate a commodity symbol and get its full details |
+| `commodity_latest_rates` | Latest prices (per-symbol updateInterval), optionally converted to a quote currency |
+| `commodity_historical_rates` | Historical OHLC prices for a specific date (from 1990; falls back to last available earlier date) |
+| `commodity_fluctuation` | Start/end price, absolute change, and percent change over a date range (no range-length limit) |
+| `commodity_time_series` | Daily OHLC prices over a date range (up to 365 days; non-trading days excluded) |
+| `commodity_symbols` | List all supported commodity symbols with metadata, including each symbol's updateInterval |
+| `commodity_symbol_info` | Look up one symbol (refresh cadence, status, unit, currency) |
 | `commodity_quotes` | List all supported quote currencies for commodity pricing |
 
 ---

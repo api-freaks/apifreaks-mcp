@@ -4,9 +4,17 @@ import { ENDPOINTS } from "../endpoints.js";
 import { callApi } from "../client.js";
 import { READ_ONLY, type Params } from "../constants.js";
 
+const UPDATE_INTERVAL_DESC =
+  "Each symbol has its own updateInterval: PER_SECOND, PER_MINUTE, PER_10_MINUTES, " +
+  "PER_HOUR, PER_DAY, PER_WEEK, or PER_MONTH. Use 'commodity_symbol_info' (or 'commodity_symbols') to read it — " +
+  "price endpoints do not return freshness.";
+
 const SYMBOL_DESC =
   "Comma-separated commodity symbols (e.g. 'XAU,XAG,WTIOIL-SPOT'). " +
-  "If unsure of the exact symbol, use 'commodity_symbols' first.";
+  "If unsure of the exact symbol, use 'commodity_symbols' first. " +
+  "If some symbols cannot be resolved, they appear in an 'unresolved' map " +
+  "(often with close-match suggestions) while rates for the rest are still returned. " +
+  "If none resolve, the request fails.";
 
 export function register(server: McpServer, apiKey: string): void {
   server.registerTool(
@@ -14,7 +22,12 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Symbols",
       description:
-        "List all supported commodity symbols with full metadata (name, unit, quote currency, exchange, status).",
+        "List all 245+ supported commodity symbols across metals, energy, agriculture, industrial, " +
+        "raw materials, oils and meals, textiles, meats, poultry, and livestock. " +
+        "Each entry includes symbol, name, category, pricing currency, unit, status, and updateInterval " +
+        "(PER_SECOND, PER_MINUTE, PER_10_MINUTES, PER_HOUR, PER_DAY, PER_WEEK, or PER_MONTH — the symbol's own refresh cadence). " +
+        "Deprecated symbols stay listed with status 'inactive' and a deprecationDate — " +
+        "historical rates remain available up to that date, but latest rates do not.",
       inputSchema: z.object({}),
       annotations: READ_ONLY,
     },
@@ -31,8 +44,11 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Symbol Info",
       description:
-        "Validate a commodity symbol and return its full metadata (name, unit, quote currency, exchange, status). " +
-        "Use this instead of 'commodity_symbols' when you already have a symbol and just need to confirm it's valid or get its details.",
+        "Validate a commodity symbol and return its full metadata, including updateInterval " +
+        "(the symbol's own refresh cadence: PER_SECOND, PER_MINUTE, PER_10_MINUTES, PER_HOUR, PER_DAY, PER_WEEK, or PER_MONTH), " +
+        "plus name, category, status, currency, unit, and optional exchange/deprecationDate. " +
+        "Use this instead of 'commodity_symbols' when you already have a symbol. " +
+        "If status is 'inactive', latest rates are unavailable and historical rates stop at deprecationDate.",
       inputSchema: z.object({
         symbol: z
           .string()
@@ -77,7 +93,8 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Quote Currencies",
       description:
-        "List all supported commodity quote currencies with symbol and currency name.",
+        "List all supported commodity quote currencies with symbol and currency name. " +
+        "Use before 'commodity_latest_rates' when converting prices into a target quote currency.",
       inputSchema: z.object({}),
       annotations: READ_ONLY,
     },
@@ -121,26 +138,23 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Latest Rates",
       description:
-        "Get real-time prices for one or more commodities. Supports custom quote currencies.",
+        "Get the latest prices for one or more commodities, with unit and currency metadata. " +
+        "An optional quote parameter converts prices into a target currency. " +
+        "If quote conversion is temporarily unavailable, rates stay in each commodity's default currency and a warning is returned. " +
+        UPDATE_INTERVAL_DESC,
       inputSchema: z.object({
         symbols: z.string().describe(SYMBOL_DESC),
-        updates: z
-          .enum(["1m", "10m"])
-          .default("1m")
-          .describe(
-            "Price update frequency: '1m' = refreshed every minute (default), '10m' = every 10 minutes.",
-          ),
         quote: z
           .string()
           .optional()
           .describe(
-            "Quote currency code (e.g. USD, EUR). If unsure, use 'commodity_quotes' first.",
+            "Target currency for the price (e.g. USD, EUR). Defaults to the market currency of each commodity. If unsure, use 'commodity_quotes' first.",
           ),
       }),
       annotations: READ_ONLY,
     },
-    async ({ symbols, updates, quote }) => {
-      const params: Params = { symbols, updates };
+    async ({ symbols, quote }) => {
+      const params: Params = { symbols };
       if (quote !== undefined) params["quote"] = quote;
       const data = await callApi(ENDPOINTS.COMMODITY_LATEST, apiKey, params);
       return {
@@ -154,12 +168,17 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Historical Rates",
       description:
-        "Get historical open, high, low, close (OHLC) prices for specific commodities on a specific date.\n" +
-        "NOTE: If data is unavailable for the exact requested date (e.g. weekends/holidays), " +
-        "this tool will automatically return the rates for the nearest previous available date.",
+        "Get OHLC (open, high, low, close) prices for commodities on a specific date, from January 1990 onwards. " +
+        "If a symbol has no rate on the requested date, the API falls back to the last available rate before it " +
+        "and returns that earlier date on the rate object. " +
+        "Symbols with updateInterval PER_MONTH only have a closing price — open, high, and low come back as 0.",
       inputSchema: z.object({
         symbols: z.string().describe(SYMBOL_DESC),
-        date: z.string().describe("Target date in YYYY-MM-DD format."),
+        date: z
+          .string()
+          .describe(
+            "Date for which the rates are required (YYYY-MM-DD). Data available from 1990 onwards.",
+          ),
       }),
       annotations: READ_ONLY,
     },
@@ -179,17 +198,21 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Fluctuation",
       description:
-        "Get price fluctuation for commodity symbols over a date range. " +
-        "If symbols are missing from results or a 404 is returned, " +
-        "use 'commodity_historical_rates' to find valid trading dates and retry.",
+        "Get start price, end price, absolute change, and percentage change for commodities over a custom date range. " +
+        "Values are rounded to 2 decimal places. There is no limit on range length. " +
+        "start_date must not be after end_date. " +
+        "For symbols with updateInterval PER_MONTH, fluctuation is computed between the first day of the start month " +
+        "and the first day of the end month.",
       inputSchema: z.object({
         symbols: z.string().describe(SYMBOL_DESC),
         start_date: z
           .string()
-          .describe("Start date of the interval in YYYY-MM-DD format."),
+          .describe(
+            "Start date for the fluctuation range (YYYY-MM-DD). Must not be after end_date.",
+          ),
         end_date: z
           .string()
-          .describe("End date of the interval in YYYY-MM-DD format."),
+          .describe("End date for the fluctuation range (YYYY-MM-DD)."),
       }),
       annotations: READ_ONLY,
     },
@@ -210,20 +233,19 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Commodity Time Series",
       description:
-        "Get daily OHLC (Open, High, Low, and Close) prices for commodities over a date range (max 365 days). " +
-        "If symbols are missing from results or a 404 is returned, " +
-        "use 'commodity_historical_rates' to find valid trading dates and retry.",
+        "Get daily OHLC (open, high, low, close) prices for commodities over a date range of up to 365 days. " +
+        "The response is a date-indexed map; non-trading days are excluded. " +
+        "A symbol counts as resolved if it appears on at least one date. " +
+        "Symbols with updateInterval PER_MONTH only have a closing price — open, high, and low come back as 0.",
       inputSchema: z.object({
         symbols: z.string().describe(SYMBOL_DESC),
         start_date: z
           .string()
-          .describe(
-            "Start date in YYYY-MM-DD format. Max range from end_date is 365 days.",
-          ),
+          .describe("Start date for the time series (YYYY-MM-DD)."),
         end_date: z
           .string()
           .describe(
-            "End date in YYYY-MM-DD format. Max range from start_date is 365 days.",
+            "End date for the time series (YYYY-MM-DD). Maximum range from start_date is 365 days.",
           ),
       }),
       annotations: READ_ONLY,

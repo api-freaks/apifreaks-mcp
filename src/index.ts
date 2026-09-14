@@ -14,7 +14,7 @@ async function main() {
   const server = new McpServer(
     {
       name: "apifreaks-mcp-server",
-      version: "2.1.0",
+      version: "2.2.0",
     },
     {
       instructions: buildServerInstructions(modules.enabled),
