@@ -1,32 +1,41 @@
-name: Publish
+name: Publish to MCP Registry
 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
 
 jobs:
-  publish:
+  publish-mcp:
+    name: Publish to MCP Registry
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-node@v5
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
 
-      - name: Publish to npm
-        if: github.event_name == 'push'
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Wait for npm version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Waiting for @apifreaks/mcp@${VERSION} on npm"
+          for i in $(seq 1 3); do
+            if npm view "@apifreaks/mcp@${VERSION}" version >/dev/null 2>&1; then
+              echo "Found @apifreaks/mcp@${VERSION}"
+              exit 0
+            else
+              echo "Attempt ${i}/3: not on npm yet, sleeping 15s"
+              sleep 15
+            fi
+          done
+          echo "@apifreaks/mcp@${VERSION} was not found on npm"
+          exit 1
 
       - name: Install mcp-publisher
         run: |

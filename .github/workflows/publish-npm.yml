@@ -1,0 +1,34 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "@apifreaks/mcp@${VERSION}" version >/dev/null 2>&1; then
+            echo "@apifreaks/mcp@${VERSION} is already on npm; skipping publish"
+          else
+            npm publish --access public --provenance
+          fi
