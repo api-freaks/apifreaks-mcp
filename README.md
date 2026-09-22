@@ -620,7 +620,7 @@ Parse user-agent strings to extract browser, OS, and device information.
 | Tool | Description |
 |---|---|
 | `user_agent_parse` | Parse a user-agent string — browser, device, OS, engine |
-| `user_agent_bulk_parse` | Parse up to 100 user-agent strings in a single request |
+| `user_agent_bulk_parse` | Parse up to 20,000 user-agent strings in a single request |
 
 ---
 

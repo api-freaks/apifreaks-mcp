@@ -41,15 +41,17 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Bulk Parse User Agents",
       description:
-        "Parse up to 100 user-agent strings in a single request. " +
-        "Returns an array of parsed objects — same fields as single parse. " +
-        "Individual parse failures include a 'message' field without blocking other results.",
+        "Parse up to 20,000 user-agent strings in a single request. " +
+        "Returns an array of parsed objects — same fields as the 'user_agent_parse' tool. " +
+        "Individual parse failures include a 'message' field without blocking other results. " +
+        "**Always ask the user before sending a large body** (hundreds to 20,000 user-agents): " +
+        "each string consumes API credits. Confirm the count and that they want to spend those credits.",
       inputSchema: z.object({
         ua_strings: z
           .array(z.string())
-          .max(100)
+          .max(20_000)
           .describe(
-            'List of user-agent strings to parse (max 100). Example: ["Mozilla/5.0 (Windows ...)", "Googlebot/2.1 (...)"]',
+            'List of user-agent strings to parse (max 20,000). Each string consumes credits — ask the user before large batches. Example: ["Mozilla/5.0 (Windows ...)", "Googlebot/2.1 (...)"]',
           ),
       }),
       annotations: READ_ONLY,
