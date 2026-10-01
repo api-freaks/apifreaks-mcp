@@ -344,10 +344,10 @@ Geolocation, ISP, network, and threat data for any IP address.
 
 | Tool | Description |
 |---|---|
-| `ipgeolocation_lookup` | Geolocation data for an IP, IPv6 address, or hostname |
-| `ipgeolocation_bulk_lookup` | Geolocation data for up to 50,000 IPs in one request |
-| `ip_security_lookup` | Threat score, VPN/proxy/Tor/bot detection for a single IP |
-| `ip_security_bulk_lookup` | Threat intelligence for up to 50,000 IPs in one request |
+| `ipgeolocation_lookup` | Location, ASN, company, currency, timezone for an IP or hostname |
+| `ipgeolocation_bulk_lookup` | Same geolocation data for up to 50,000 IPs in one request |
+| `ip_security_lookup` | Threat score plus VPN/proxy/Tor/bot/spam/cloud/gateway signals for one IP |
+| `ip_security_bulk_lookup` | Same threat intelligence for up to 50,000 IPs in one request |
 
 ---
 
