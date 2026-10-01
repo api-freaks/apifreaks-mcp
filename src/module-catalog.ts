@@ -12,10 +12,10 @@ export const MODULE_CATALOG = {
   "ip-intelligence": {
     summary: "IP geolocation and threat intelligence (single + bulk)",
     tools: [
-      { name: "ipgeolocation_lookup", summary: "Geolocation for an IP or hostname" },
-      { name: "ipgeolocation_bulk_lookup", summary: "Geolocation for many IPs" },
-      { name: "ip_security_lookup", summary: "Threat / VPN / proxy / Tor for one IP" },
-      { name: "ip_security_bulk_lookup", summary: "Threat intelligence for many IPs" },
+      { name: "ipgeolocation_lookup", summary: "Geolocation, ASN, company, timezone for an IP or hostname" },
+      { name: "ipgeolocation_bulk_lookup", summary: "Geolocation for up to 50,000 IPs" },
+      { name: "ip_security_lookup", summary: "Threat score, VPN/proxy/Tor/bot/gateway signals for one IP" },
+      { name: "ip_security_bulk_lookup", summary: "Threat intelligence for up to 50,000 IPs" },
     ],
   },
   geocoding: {

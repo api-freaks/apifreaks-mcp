@@ -13,6 +13,21 @@ export const GeoLang = z.enum([
   "cs",
   "it",
 ]);
+/** Languages supported by IP Geolocation / Bulk IP Lookup `lang`. */
+export const IpGeoLang = z.enum([
+  "en",
+  "de",
+  "ru",
+  "ja",
+  "fr",
+  "cn",
+  "es",
+  "cs",
+  "it",
+  "ko",
+  "fa",
+  "pt",
+]);
 export const DistanceUnit = z.enum(["km", "mi", "yd", "m", "ft", "in"]);
 export const WhoisReverseLookupMode = z.enum(["default", "mini"]);
 export const DomainResultSource = z.enum(["whois", "dns"]);

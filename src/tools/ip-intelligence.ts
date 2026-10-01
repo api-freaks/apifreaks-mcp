@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { ENDPOINTS } from "../endpoints.js";
 import { callApi } from "../client.js";
-import { GeoLang } from "../enums.js";
+import { IpGeoLang } from "../enums.js";
 import { READ_ONLY, type Params } from "../constants.js";
 
 const INCLUDE_DESC =
@@ -10,10 +10,19 @@ const INCLUDE_DESC =
   "Available: security, hostname, liveHostname, hostnameFallbackLive, user_agent, abuse, dma_code, geo_accuracy. Use '*' to include all modules. " +
   "Note: 'security' and 'abuse' fields cost extra credits.";
 const FIELDS_DESC =
-  "Comma-separated dot-path fields to include in the response (allowlist). E.g. 'location.city,asn.organization'.";
+  "Comma-separated dot-path fields to include in the response (allowlist). E.g. 'location.city,asn.organization' or 'security.threat_score'.";
 const EXCLUDES_DESC =
-  "Comma-separated dot-path fields to exclude from the response (denylist). E.g. 'location.city,asn.organization'.";
-const LANG_DESC = "Language for location name fields. Defaults to English.";
+  "Comma-separated dot-path fields to exclude from the response (denylist). The 'ip' field is always included and cannot be excluded.";
+const LANG_DESC =
+  "Language for location name fields. Defaults to English. " +
+  "Supported: en, de, ru, ja, fr, cn, es, cs, it, ko, fa, pt.";
+const SECURITY_PROFILE_DESC =
+  "a 0-100 'threat_score' plus VPN, proxy (incl. residential), Tor, relay, anonymity, " +
+  "known-attacker, bot, spam, cloud-provider, and corporate-gateway signals. " +
+  "Where available: provider names, confidence scores, last-seen dates; for bots also 'bot_type', " +
+  "'is_known_good_bot', 'bot_operator_name', and confidence; for gateways 'corporate_gateway_type' " +
+  "('secure_web_gateway' | 'browser_isolation') and provider name. " +
+  "Use fields/excludes with dot-paths (e.g. 'security.threat_score') to trim the response.";
 
 const IncludeModule = z.enum([
   "security",
@@ -24,7 +33,7 @@ const IncludeModule = z.enum([
   "abuse",
   "dma_code",
   "geo_accuracy",
-  "*"
+  "*",
 ]);
 
 export function register(server: McpServer, apiKey: string): void {
@@ -34,13 +43,14 @@ export function register(server: McpServer, apiKey: string): void {
       title: "IP Geolocation Lookup",
       description:
         "Look up geolocation data for an IP address, IPv6 address, or hostname. " +
-        "Returns location, network/ASN, currency, timezone and optionally security, dma_code, " +
-        "hostname, abuse contact, and user-agent data. 'ip' field is required — pass the IP or hostname to look up.",
+        "Returns location, country_metadata, network, ASN, company, currency, and time_zone by default. " +
+        "Pass include to add security, hostname/liveHostname/hostnameFallbackLive, user_agent, abuse, dma_code, " +
+        "or geo_accuracy (or '*' for all). Bogon/reserved IPs return 423; unrecognized IPs return 404.",
       inputSchema: z.object({
         ip: z
           .string()
           .describe("IPv4 address, IPv6 address, or hostname to look up."),
-        lang: GeoLang.default("en").describe(LANG_DESC),
+        lang: IpGeoLang.default("en").describe(LANG_DESC),
         include: z.array(IncludeModule).optional().describe(INCLUDE_DESC),
         fields: z.string().optional().describe(FIELDS_DESC),
         excludes: z.string().optional().describe(EXCLUDES_DESC),
@@ -65,8 +75,9 @@ export function register(server: McpServer, apiKey: string): void {
       title: "Bulk IP Geolocation Lookup",
       description:
         "Look up geolocation data for up to 50,000 IP addresses or hostnames in one request. " +
-        "Returns an array of geolocation objects — same fields as the single lookup. " +
-        "Individual IP failures include a 'message' field; they don't block other results.",
+        "Returns an array in request order — same default fields as the single lookup (location, " +
+        "country_metadata, network, ASN, company, currency, time_zone), with the same include modules. " +
+        "Individual IP failures return a per-item object with a 'message' field; they don't block other results.",
       inputSchema: z.object({
         ips: z
           .array(z.string())
@@ -74,7 +85,7 @@ export function register(server: McpServer, apiKey: string): void {
           .describe(
             'List of IPv4/IPv6 addresses or hostnames to look up (max 50,000). Example: ["8.8.8.8", "1.1.1.1"]',
           ),
-        lang: GeoLang.default("en").describe(LANG_DESC),
+        lang: IpGeoLang.default("en").describe(LANG_DESC),
         include: z.array(IncludeModule).optional().describe(INCLUDE_DESC),
         fields: z.string().optional().describe(FIELDS_DESC),
         excludes: z.string().optional().describe(EXCLUDES_DESC),
@@ -104,17 +115,25 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "IP Threat Intelligence Lookup",
       description:
-        "IP threat intelligence for a single IP address. Returns a threat score plus VPN, proxy, " +
-        "Tor, residential proxy, relay, bot, spam, known-attacker, and cloud-provider detection.",
+        "IP threat intelligence for a single IPv4 or IPv6 address. Returns " +
+        SECURITY_PROFILE_DESC +
+        " If 'ip' is omitted, the public IP of the requesting client is used. " +
+        "Malformed IPs return 400; bogon/reserved IPs return 423.",
       inputSchema: z.object({
-        ip: z.string().describe("IPv4 or IPv6 address to check."),
+        ip: z
+          .string()
+          .optional()
+          .describe(
+            "IPv4 or IPv6 address to check. If omitted, the public IP of the requesting client is used.",
+          ),
         fields: z.string().optional().describe(FIELDS_DESC),
         excludes: z.string().optional().describe(EXCLUDES_DESC),
       }),
       annotations: READ_ONLY,
     },
     async ({ ip, fields, excludes }) => {
-      const params: Params = { ip };
+      const params: Params = {};
+      if (ip !== undefined) params["ip"] = ip;
       if (fields !== undefined) params["fields"] = fields;
       if (excludes !== undefined) params["excludes"] = excludes;
       const data = await callApi(ENDPOINTS.IP_SECURITY, apiKey, params);
@@ -129,11 +148,12 @@ export function register(server: McpServer, apiKey: string): void {
     {
       title: "Bulk IP Threat Intelligence Lookup",
       description:
-        "IP threat intelligence for up to 50,000 IP addresses in one request. Returns an array of " +
-        "threat scores plus VPN, proxy, Tor, residential proxy, relay, bot, spam, known-attacker, " +
-        "and cloud-provider detection for each IP.",
+        "IP threat intelligence for up to 50,000 IP addresses in one request. " +
+        "Returns an array in request order with the same security profile as the single lookup: " +
+        SECURITY_PROFILE_DESC +
+        " A bad or bogon IP in the batch returns a per-item object with a 'message' field; it does not fail the whole request.",
       inputSchema: z.object({
-        ips: z  
+        ips: z
           .array(z.string())
           .max(50_000)
           .describe(
