@@ -91,7 +91,7 @@ Hyphens and underscores are interchangeable (`user-agent` and `user_agent` both 
 | `screenshot` | Capture, scrolling capture, bulk |
 | `pdf` | Merge, split, compress, protect, generate, convert |
 | `currency` | Live/historical rates, converters, time series, symbols, limits |
-| `commodity` | Live/historical prices (245+), fluctuation, time series, symbols |
+| `commodity` | Live/historical/intraday prices (520+), fluctuation, time series, symbols |
 | `financial` | VAT rates, VAT numbers, IBAN, SWIFT/BIC |
 | `zipcode` | Lookup, radius, distance, city/region |
 | `weather` | Current, forecast, historical, air quality, marine, flood, astronomy |
@@ -517,19 +517,20 @@ Live and historical exchange rates for 170+ fiat currencies and 830+ cryptocurre
 
 ---
 
-### Commodity (`commodity`) — 7 tools
+### Commodity (`commodity`) — 8 tools
 
-Real-time and historical prices for 245+ commodities across metals, energy, agriculture, and more. If some symbols cannot be resolved, the API returns a partial result with an `unresolved` map instead of failing the whole request.
+Real-time, historical, and intraday prices for 520+ commodities across metals, energy, agriculture, and more. On the multi-symbol endpoints, symbols that cannot be resolved come back in an `unresolved` map while the rest of the request still succeeds. Intraday rates take exactly one symbol.
 
 | Tool | Description |
 |---|---|
-| `commodity_latest_rates` | Latest prices (per-symbol updateInterval), optionally converted to a quote currency |
-| `commodity_historical_rates` | Historical OHLC prices for a specific date (from 1990; falls back to last available earlier date) |
-| `commodity_fluctuation` | Start/end price, absolute change, and percent change over a date range (no range-length limit) |
-| `commodity_time_series` | Daily OHLC prices over a date range (up to 365 days; non-trading days excluded) |
-| `commodity_symbols` | List all supported commodity symbols with metadata, including each symbol's updateInterval |
+| `commodity_latest_rates` | Latest prices, optionally converted to a quote currency. `metadata=false` returns prices only |
+| `commodity_historical_rates` | OHLC for a date. Falls back to the last earlier price. Monthly symbols are dated on the first of the month, with open, high, and low equal to close. Delivery-month history starts October 2026 |
+| `commodity_fluctuation` | Start rate, end rate, absolute change, and percent change over any date range (values rounded to 2 decimals) |
+| `commodity_time_series` | Daily OHLC over up to 365 days. Dates and per-symbol gaps with no price are omitted |
+| `commodity_intraday_rates` | Timestamped prices for one symbol on a UTC day, at an interval from 1 minute to 1 day (max 100 points per response) |
+| `commodity_symbols` | Full symbol catalog, including `updateInterval`. Pass `underlying` to list delivery months for a continuous futures symbol |
 | `commodity_symbol_info` | Look up one symbol (refresh cadence, status, unit, currency) |
-| `commodity_quotes` | List all supported quote currencies for commodity pricing |
+| `commodity_quotes` | Fiat currencies from the currency catalog, for the latest-rates `quote` parameter |
 
 ---
 

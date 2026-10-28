@@ -32,6 +32,21 @@ export const DistanceUnit = z.enum(["km", "mi", "yd", "m", "ft", "in"]);
 export const WhoisReverseLookupMode = z.enum(["default", "mini"]);
 export const DomainResultSource = z.enum(["whois", "dns"]);
 export const CurrencyUpdateFrequency = z.enum(["1m", "10m", "1h", "1d"]);
+/** Intervals accepted by Commodity Intraday Rates. */
+export const CommodityIntradayInterval = z.enum([
+  "1m",
+  "5m",
+  "10m",
+  "15m",
+  "30m",
+  "45m",
+  "1h",
+  "2h",
+  "4h",
+  "8h",
+  "12h",
+  "1d",
+]);
 export const ScreenshotFileType = z.enum(["PNG", "JPG", "WebP", "PDF"]);
 export const ScrollingFileType = z.enum(["MP4", "WEBM", "GIF"]);
 export const ScrollSpeed = z.enum(["fast", "normal", "slow"]);

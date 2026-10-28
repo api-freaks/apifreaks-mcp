@@ -5,6 +5,7 @@ export const ENDPOINTS = {
   COMMODITY_HISTORICAL: "/v2.0/commodity/rates/historical",
   COMMODITY_FLUCTUATION: "/v2.0/commodity/fluctuation",
   COMMODITY_TIMESERIES: "/v2.0/commodity/time-series",
+  COMMODITY_INTRADAY: "/v2.0/commodity/rates/intraday",
 
   // Weather
   WEATHER_CURRENT: "/v1.0/weather/current",

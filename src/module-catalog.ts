@@ -227,27 +227,41 @@ export const MODULE_CATALOG = {
     ],
   },
   commodity: {
-    summary: "Live/historical prices (245+), fluctuation, time series, symbols",
+    summary:
+      "Live/historical/intraday prices (520+), fluctuation, time series, symbols",
     tools: [
       {
         name: "commodity_latest_rates",
-        summary: "Latest prices; freshness is per-symbol updateInterval",
+        summary: "Latest prices, optional quote currency and metadata",
       },
       {
         name: "commodity_historical_rates",
-        summary: "Historical OHLC prices from 1990",
+        summary: "OHLC for one date, with fallback to the last earlier price",
       },
-      { name: "commodity_fluctuation", summary: "Price change over a range" },
+      {
+        name: "commodity_fluctuation",
+        summary: "Start/end price and percent change over any date range",
+      },
       {
         name: "commodity_time_series",
         summary: "Daily OHLC over a range (max 365 days)",
       },
-      { name: "commodity_symbols", summary: "Supported commodity symbols" },
+      {
+        name: "commodity_intraday_rates",
+        summary: "One symbol through a UTC day, from 1m to 1d",
+      },
+      {
+        name: "commodity_symbols",
+        summary: "Symbol catalog, or delivery months via underlying",
+      },
       {
         name: "commodity_symbol_info",
         summary: "Look up one symbol, including updateInterval",
       },
-      { name: "commodity_quotes", summary: "Supported quote currencies" },
+      {
+        name: "commodity_quotes",
+        summary: "Fiat currencies for the latest-rates quote parameter",
+      },
     ],
   },
   financial: {
