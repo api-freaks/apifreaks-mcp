@@ -86,11 +86,13 @@ export const MODULE_CATALOG = {
       },
       {
         name: "email_disposable_check",
-        summary: "Throwaway, free, spam, role, and MX checks for one email",
+        summary:
+          "Throwaway, free, spam, role, and mail-server checks for one email, with optional IP location and security data",
       },
       {
         name: "email_bulk_disposable_check",
-        summary: "Disposable checks for up to 100 email addresses",
+        summary:
+          "The same disposable checks for up to 100 addresses, each with an optional IP",
       },
     ],
   },

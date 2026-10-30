@@ -409,8 +409,8 @@ Deliverability, syntax, domain, optional IP enrichment, and disposable-provider 
 |---|---|
 | `email_validate` | Validate a single email address |
 | `email_bulk_validate` | Validate up to 100 email addresses in one request |
-| `email_disposable_check` | Check whether one address is throwaway, free, spam-listed, or role-based, and whether its domain has mail servers |
-| `email_bulk_disposable_check` | Run the disposable check on up to 100 addresses in one request |
+| `email_disposable_check` | Throwaway provider, domain and mail servers, free provider, spam listing, and role mailbox for one address. Optional IP adds location and security data |
+| `email_bulk_disposable_check` | The same disposable check for up to 100 addresses. Each entry is an email and an optional IP |
 
 ---
 
